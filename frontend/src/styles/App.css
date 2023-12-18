@@ -1,0 +1,400 @@
+body,
+html {
+  margin: 0px;
+  padding: 0px;
+  background: #f5f5f5;
+}
+
+body:fullscreen {
+  overflow: scroll !important;
+}
+
+body:-ms-fullscreen {
+  overflow: scroll !important;
+}
+
+body:-webkit-full-screen {
+  overflow: scroll !important;
+}
+
+body:-moz-full-screen {
+  overflow: scroll !important;
+}
+
+p {
+  margin: 0px !important;
+}
+
+::-webkit-scrollbar {
+  width: 10px;
+  height: 10px;
+}
+
+::-webkit-scrollbar-track {
+  border-radius: 10px;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #7db1d4b0;
+  border-radius: 2px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--themeBlue);
+  cursor: pointer;
+}
+
+ol,
+ul {
+  list-style: none;
+  padding: 0;
+}
+
+:root {
+  /* --lightBlue:#b3e5fc; */
+  --lightBlue: #e6eef9;
+  --selectedColor: #b3e5fc;
+  --darkBlue: #00456f;
+  --lightTeal: #b2dfdb;
+  --themeBlue: #1565c0;
+
+  --themeGreen: #2b8734;
+  /*Approved */
+  --themeOrange: #fd7e14;
+  /* Reject*/
+  --themeRed: #dc3545;
+  /*Scrap */
+  --themeBrown: #703915;
+  /* Cancel*/
+  --themeSuccess: #6d2380;
+  /* Cancelled */
+  --themeCyan: #0dcaf0;
+  /* created */
+  --themeIndigo: #6610f2;
+  /* indigo*/
+  --themeYellow: #ffc107;
+  /* Pick up*/
+
+  --placeReel: "#64b5f6";
+  --pickReel: "#4caf50";
+  --pickError: "#f44336";
+  --boxShadow: 0 0 1px 0 rgba(24, 94, 224, 0.15),
+    0 2px 8px 0 rgba(24, 94, 224, 0.15);
+  --box-shadow-sm: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.075);
+
+  --iconWidth: 50px;
+  --iconHeight: 50px;
+
+  --pageContentHeight: calc(100vh - 96px);
+}
+
+.rackOffline {
+  color: var(--themeRed);
+}
+
+.rackOnline {
+  color: var(--themeGreen);
+}
+
+.bgRed {
+  background-color: rgb(224, 166, 166) !important;
+  color: Black;
+}
+
+.themeEffeciancy {
+  color: #2b8734;
+}
+
+.bgDarkBlue {
+  background-color: var(--darkBlue);
+  color: white;
+}
+
+.bgLightTeal {
+  background-color: var(--lightTeal);
+}
+
+.bgLightBlue {
+  background-color: var(--lightBlue);
+  color: black;
+}
+
+.bgRed {
+  background-color: rgb(241, 161, 161);
+}
+
+.green {
+  background-color: white;
+  animation-name: test;
+  animation-duration: 2s;
+}
+
+@keyframes test {
+  0% {
+    color: white;
+    background-color: rgb(92, 243, 92);
+    opacity: 0;
+  }
+
+  50% {
+    color: white;
+    background-color: rgb(51, 231, 51);
+    opacity: 1;
+  }
+
+  100% {
+    color: rgb(17, 16, 16);
+    background-color: rgb(254, 254, 254);
+    opacity: 0;
+  }
+}
+
+.pointer {
+  cursor: pointer;
+}
+
+.cardShadow {
+  border-radius: 5px;
+  box-shadow: rgba(130, 133, 134, 0.3) 0px 1px 2px 0px,
+    rgba(105, 107, 109, 0.15) 0px 2px 3px 2px;
+}
+
+.tttt {
+  color: var(--themeBlue);
+  font-weight: "bolder";
+}
+
+.gridView {
+  display: grid;
+  grid-template-columns: auto 1fr !important;
+  grid-template-rows: auto 1fr !important;
+}
+
+.content {
+  margin: 20px;
+}
+
+.expandMore {
+  display: none;
+}
+
+.navLinks {
+  display: flex;
+}
+
+.navContent {
+  font-weight: 500;
+  font-size: 17px;
+  color: var(--darkBlue);
+}
+
+.expandSideMenu {
+  display: none;
+}
+
+.highlight {
+  cursor: pointer;
+}
+
+.highlight:hover {
+  background-color: var(--lightBlue);
+  color: #00456f;
+  border-radius: 5px;
+}
+
+.selected {
+  background-color: var(--selectedColor);
+  border-radius: 5px;
+  color: #00456f;
+}
+
+.marker {
+  border-radius: 5px 0px 0px 5px;
+  height: 25px;
+  width: 5px;
+  background-color: #00456f;
+}
+
+.normalFont {
+  font-size: 12px;
+}
+
+.smallFont {
+  font-size: 11px;
+}
+
+.mediumFont {
+  font-size: 14px;
+}
+
+.largeFont {
+  font-size: 18px;
+}
+
+.boldFont {
+  font-weight: 600;
+}
+
+.breadCrumbsHeader {
+  font-size: 16px;
+}
+
+@media (max-width: 1150px) {
+  .expandMore {
+    display: block;
+  }
+
+  .navLinks {
+    display: none !important;
+  }
+
+  .expandSideMenu {
+    display: block;
+  }
+
+  .sideNavBar {
+    display: none;
+  }
+}
+
+.optionMenu {
+  position: absolute;
+  background-color: white;
+  border-radius: 6px;
+  min-width: 180px;
+  z-index: 10000;
+  right: 0;
+  transform-origin: top right;
+  transition: 1s;
+  margin-right: 10px;
+  box-shadow: rgb(0 0 0 / 13%) 0px 3.2px 7.2px 0px,
+    rgb(0 0 0 / 11%) 0px 0.6px 1.8px 0px;
+}
+
+.error-boundary {
+  padding-top: 25px;
+  margin: auto;
+  text-align: center;
+}
+
+.divide {
+  display: grid;
+  width: 100%;
+  grid-template-columns: 1fr 250px;
+}
+
+.textDecor {
+  color: var(--darkBlue);
+  font-weight: 500;
+  font-size: 14px;
+}
+
+.inProgress {
+  position: absolute;
+  width: 200px;
+  height: 200px;
+  left: 0;
+  top: 10;
+  background-color: #eeeeee;
+  border-right: 2px dotted red;
+}
+
+.css-p9v5at-MuiFormLabel-root-MuiInputLabel-root {
+  font-size: 12px !important;
+}
+
+.css-19qh8xo-MuiInputBase-input-MuiOutlinedInput-input {
+  font-size: 12px !important;
+}
+
+.css-1kxbtff-MuiAutocomplete-root
+  .MuiOutlinedInput-root.MuiInputBase-sizeSmall {
+  padding-top: 7px !important;
+  padding-bottom: 7px !important;
+}
+
+.expandSideMenu {
+  display: none;
+}
+
+.sideNavBar {
+  position: sticky;
+  min-width: 220px;
+  top: 72px;
+  height: var(--pageContentHeight);
+}
+
+.sideNavBarContent {
+  overflow-y: auto;
+  max-width: 250px;
+  margin-left: 10px;
+  margin-right: 10px;
+}
+
+.sideNavBarContent a {
+  text-decoration: none;
+  color: black;
+}
+
+.sideNavBarContent ul {
+  margin-bottom: 20px;
+}
+
+.sideNavBarContent li {
+  display: flex;
+  height: 40px;
+  padding: 0px 0px 0px 10px;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.sideNavBarContent li:first-child {
+  margin-top: 10px;
+}
+
+.sideNavContent {
+  display: block;
+  min-width: 250px;
+}
+
+.sideNavContent a {
+  padding: 2px 5px;
+}
+
+@media (max-width: 1280px) {
+  .sideNavContent {
+    display: none;
+  }
+}
+
+@media (max-width: 1150px) {
+  .sideNavBar {
+    display: none;
+  }
+}
+
+@media (max-width: 1150px) {
+  .expandSideMenu {
+    display: block;
+  }
+
+  .sideNavBar {
+    display: none;
+  }
+}
+
+.MuiCard-root {
+  box-shadow: var(--box-shadow-sm);
+}
+
+.MuiPaper-elevation8 {
+  box-shadow: var(--box-shadow-sm);
+}
+
+.MuiPaper-rounded {
+  box-shadow: var(--box-shadow-sm);
+}
+
+.MuiPaper-elevation {
+  box-shadow: var(--box-shadow-sm);
+}

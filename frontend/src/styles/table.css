@@ -1,0 +1,24 @@
+#tableColBtn span {
+  display: inline-block;
+  /* position: relative; */
+  cursor: pointer;
+  z-index: 15;
+  width: min-content;
+  height: min-content;
+  background-color: #457ab1 !important;
+  border-radius: 0px 5px 5px 0px;
+  color: white;
+  padding: 4px 0px;
+  writing-mode: vertical-lr;
+}
+#tableColBtn span:hover {
+  background-color: #00456f !important;
+}
+
+.systemWarningTable {
+  margin-top: 10px;
+  margin-left: 10px;
+  height: 150px;
+  width: 100rem;
+  overflow: scroll;
+}
