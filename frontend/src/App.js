@@ -7,6 +7,7 @@ import "bootstrap/dist/css/bootstrap.css";
 
 import Login from "./pages/auth/Login";
 import ProtectedRoute from "./components/ProtectedRoute";
+import HomePage from "./pages/HomePage";
 import Inventory from "./pages/inventory/Inventory";
 import WorkOrders from "./pages/work-order/WorkOrders";
 
@@ -37,7 +38,7 @@ function App() {
   let dispatch = useDispatch();
 
   const getHomePage = useCallback(() => {
-    return routes.inventory;
+    return routes.homePage;
   }, []);
 
   useEffect(() => {
@@ -68,6 +69,14 @@ function App() {
         <Route path={"/"} element={<Navigate to={getHomePage()} replace />} />
         <Route
           index
+          path={routes.homePage}
+          element={
+            <ProtectedRoute>
+              <HomePage />
+            </ProtectedRoute>
+          }
+        />
+        <Route
           path={routes.inventory}
           element={
             <ProtectedRoute>

@@ -9,8 +9,8 @@ import validateServices from "../../helper/validateServices";
 import { updateInventory } from "../../redux/action/index";
 import DataTable from "../../components/table/DataTable";
 import { routes } from "../../helper/routes";
-function ApproveWorkOrder({ handleModalClose, productItems }) {
-  console.log(productItems);
+function ApproveWorkOrder({ handleModalClose, workOrderItems }) {
+  console.log(workOrderItems);
 
   const dispatch = useDispatch();
   const { inventory } = useSelector((state) => state);
@@ -85,14 +85,14 @@ function ApproveWorkOrder({ handleModalClose, productItems }) {
   );
 
   const productData = useMemo(() => {
-    return productItems.map((item) => {
+    return workOrderItems.map((item) => {
       const availableQuantity = calculateAvailableQuantity(item.partNumber);
       return {
         ...item,
         availableQuantity,
       };
     });
-  }, [productItems, calculateAvailableQuantity]);
+  }, [workOrderItems, calculateAvailableQuantity]);
 
   /* const getData = useCallback(async () => {
     toggleLoading(true);
@@ -120,12 +120,11 @@ function ApproveWorkOrder({ handleModalClose, productItems }) {
   });*/
 
   const handlePurchaseOrderClick = () => {
-    //const newPurchaseOrderNumber = generatePurchaseOrderNumber();
-    let loopProduct = productItems.map((items) => {
+    let loopProduct = workOrderItems.map((items) => {
       return items.quantity;
     });
 
-    let loopPartnumber = productItems.map((items) => items.partNumber);
+    let loopPartnumber = workOrderItems.map((items) => items.partNumber);
 
     let loopInventory = inventory.filter((element) =>
       loopPartnumber.some((item) => item === element.partNumber)
@@ -134,16 +133,16 @@ function ApproveWorkOrder({ handleModalClose, productItems }) {
     let availableItems = loopInventory.map(
       (getquantity) => getquantity.quantity
     );
-
-    let resltPartnumber = [];
+    console.log(availableItems);
+    let resultPartnumber = [];
     let resultQuantity = [];
 
-    for (let i = 0; i < productItems.length; i++) {
-      if (productItems[i].quantity > loopInventory[i].quantity) {
-        resltPartnumber.push(productItems[i].partNumber);
+    for (let i = 0; i < workOrderItems.length; i++) {
+      if (workOrderItems[i].quantity > loopInventory[i].quantity) {
+        resultPartnumber.push(workOrderItems[i].partNumber);
       }
     }
-    let purchasePartnumbers = resltPartnumber;
+    let purchasePartnumbers = resultPartnumber;
 
     for (let i = 0; i < loopProduct.length; i++) {
       if (loopProduct[i] > availableItems[i]) {
@@ -152,6 +151,7 @@ function ApproveWorkOrder({ handleModalClose, productItems }) {
     }
 
     let shortageItems = resultQuantity;
+    console.log(shortageItems);
 
     navigate(routes.addProducts, {
       state: {

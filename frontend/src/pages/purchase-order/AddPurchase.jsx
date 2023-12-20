@@ -106,7 +106,6 @@ const AddPurchase = () => {
   }, [dispatch]);
 
   useMemo(() => {
-    //if () {
     const purchasableData = purchaseList;
     if (purchasableData) {
       location?.state?.data?.forEach((partNumber, quantity) => {
@@ -119,10 +118,9 @@ const AddPurchase = () => {
 
       setPurchaseList(purchasableData);
     }
-    // }
   }, [purchaseList]);
 
-  const sortedPurchaseData = useMemo(() => {
+  /*const sortedPurchaseData = useMemo(() => {
     let sorted = [];
     if (sortColumn === "partNumber") {
       sorted = _.orderBy(purchaseInput, "partNumber", sortOrder);
@@ -132,7 +130,7 @@ const AddPurchase = () => {
       sorted = _.orderBy(purchaseList, sortColumn, sortOrder);
     }
     return sorted;
-  }, [purchaseInput, sortColumn, sortOrder]);
+  }, [purchaseInput, sortColumn, sortOrder]);*/
 
   // schema validation for add purchase order
   const schema = () => ({
@@ -214,7 +212,7 @@ const AddPurchase = () => {
     );
 
     setPurchaseList(filterItem);
-
+    console.log(purchaseList);
     onCancel();
   };
 
@@ -337,7 +335,7 @@ const AddPurchase = () => {
             </div>
             <DataTable
               columns={columns}
-              rows={sortedPurchaseData}
+              rows={purchaseList}
               sortColumn={sortColumn}
               sortOrder={sortOrder}
               setSortColumn={setSortColumn}

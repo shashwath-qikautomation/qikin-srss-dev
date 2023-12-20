@@ -19,6 +19,7 @@ import _ from "lodash";
 import moment from "moment";
 import { updateBOMList } from "../../redux/action";
 import Breadcrumbs from "../../components/Breadcrumbs";
+import ExportTableData from "../../components/ExportTableData";
 
 function ProductPage() {
   const [showBOMUpload, toggleBOMUpload] = useState(false);
@@ -113,12 +114,12 @@ function ProductPage() {
     getData();
   }, []);
 
-  // const manageColumns = (column, checked) => {
-  //   const updated = { ...hiddenColumns };
-  //   updated[column] = checked;
+  const manageColumns = (column, checked) => {
+    const updated = { ...hiddenColumns };
+    updated[column] = checked;
 
-  //   setHiddenColumns(updated);
-  // };
+    setHiddenColumns(updated);
+  };
 
   const dataTableSearch = (dataToFilter) => {
     let filtered = dataToFilter.filter(
@@ -233,7 +234,13 @@ function ProductPage() {
                     }}
                   />
                 </div>
-                <div></div>
+                <ExportTableData
+                  columns={columns}
+                  tableData={sortedProductData}
+                  hiddenColumns={hiddenColumns}
+                  fileName={"Products Details"}
+                  tableHeader={"Products Details"}
+                />
               </div>
             </div>
 

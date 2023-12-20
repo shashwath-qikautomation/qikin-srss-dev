@@ -20,6 +20,7 @@ import { updateWorkOrder } from "../../redux/action";
 import { IconButton } from "@mui/material";
 import ConfirmBox from "../../components/ConfirmBox";
 import Breadcrumbs from "../../components/Breadcrumbs";
+import ExportTableData from "../../components/ExportTableData";
 
 function WorkOrders() {
   const [sortColumn, setSortColumn] = useState("createdAt");
@@ -35,6 +36,7 @@ function WorkOrders() {
   const [showConfirm, setShowConfirm] = useState(false);
   const dispatch = useDispatch();
   const { workOrders } = useSelector((state) => state);
+  const [hiddenColumns, setHiddenColumns] = useState({});
 
   const columns = [
     {
@@ -182,7 +184,7 @@ function WorkOrders() {
     setShowWorkOrder(false);
   }, []);
 
-  const sortedWorkorderData = useMemo(() => {
+  const sortedWorkOrderData = useMemo(() => {
     let sorted = [];
     if (sortColumn === "workOrderNumber") {
       sorted = _.orderBy(workorderData, ["workOrderNumber"], [sortOrder]);
@@ -243,15 +245,26 @@ function WorkOrders() {
                   }}
                 />
               </div>
-              <Button
-                name={"Add Work Order"}
-                onClick={() => {
-                  navigate(routes.addWorkOrder);
-                }}
-              />
+              <div className="d-flex">
+                <div className="px-2">
+                  <Button
+                    name={"Add Work Order"}
+                    onClick={() => {
+                      navigate(routes.addWorkOrder);
+                    }}
+                  />
+                </div>
+                <ExportTableData
+                  columns={columns}
+                  tableData={sortedWorkOrderData}
+                  hiddenColumns={hiddenColumns}
+                  fileName={"Work Order Details"}
+                  tableHeader={"Work Order Details"}
+                />
+              </div>
             </div>
             <DataTable
-              rows={sortedWorkorderData}
+              rows={sortedWorkOrderData}
               columns={columns}
               sortColumn={sortColumn}
               sortOrder={sortOrder}

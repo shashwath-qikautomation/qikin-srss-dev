@@ -278,8 +278,20 @@ const EditPurchaseOrder = () => {
               required
             />
             <Button
+              name="save"
+              onClick={handleSave}
+              isLoading={isLoading}
+              disabled={
+                purchaseInput.status === 1 || purchasedItems.length === 0
+              }
+            />
+            <Button
               name={"Approve"}
-              disabled={purchaseInput.status === 1 ? true : false}
+              disabled={
+                purchaseInput.status === 1 || purchasedItems.length === 0
+                  ? true
+                  : false
+              }
               isLoading={isLoading}
               onClick={approvePurchasedOrder}
             />
@@ -329,14 +341,6 @@ const EditPurchaseOrder = () => {
             setCurrentPage={setCurrentPage}
             setRowsPerPage={setRowsPerPage}
           />
-          <div className="modal-btn d-flex justify-content-end">
-            <Button
-              name="save"
-              onClick={handleSave}
-              isLoading={isLoading}
-              disabled={purchaseInput.status === 1}
-            />
-          </div>
         </Card>
       </Container>
     </div>

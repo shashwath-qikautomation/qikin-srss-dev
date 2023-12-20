@@ -14,6 +14,7 @@ import { useDispatch, useSelector } from "react-redux";
 import { updateUsers } from "../../../redux/action";
 import { routes } from "../../../helper/routes";
 import ConfirmBox from "../../../components/ConfirmBox";
+import ExportTableData from "../../../components/ExportTableData";
 
 const UserList = () => {
   const dispatch = useDispatch();
@@ -254,9 +255,15 @@ const UserList = () => {
                   <div className="px-2">
                     <Button name={"Add"} onClick={addNewUser} />
                   </div>
+                  <ExportTableData
+                    columns={columns}
+                    tableData={sortedUserListData}
+                    hiddenColumns={hiddenColumns}
+                    fileName={"User List Details"}
+                    tableHeader={"User List Details"}
+                  />
                 </div>
               </div>
-
               <DataTable
                 columns={columns}
                 rows={sortedUserListData}

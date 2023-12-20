@@ -17,7 +17,7 @@ const SideNav = () => {
       className="fixed z-1"
       style={{
         //height: "calc(100vh - 80px)",
-        height: "100vh",
+        height: "90vh",
         width: "480px",
         overflowY: "scroll",
         backgroundColor: "white",

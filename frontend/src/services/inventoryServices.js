@@ -60,10 +60,14 @@ const updateInventory = async (updatedInventory) => {
   }
 };
 
-const deleteInventory = async (deleteInventoryId) => {
+const deleteInventory = async (selectedInventoryID) => {
   try {
     const { status } = await http.delete(
-      apiEndPoints.serverPath + apiEndPoints.inventory + "/" + deleteInventoryId
+      apiEndPoints.serverPath +
+        apiEndPoints.inventory +
+        "/" +
+        selectedInventoryID._id,
+      selectedInventoryID
     );
     if (status === 200) {
       return status;

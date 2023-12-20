@@ -22,13 +22,12 @@ function AddWorkOrder() {
   const { products, workOrders } = useSelector((state) => state);
   const { id } = useParams();
   const [errors, setErrors] = useState("");
-  const [selectedProductErrors, setSelectedProductErrors] = useState("");
   const navigate = useNavigate();
   const [description, setDescription] = useState("");
   const [inputData, setInputData] = useState({
     workOrderNumber: "",
-    quantity: "",
     productName: "",
+    quantity: "",
   });
   const [selectedProduct, setSelectedProduct] = useState(null);
   const [workOrderItems, setWorkOrderItems] = useState([]);
@@ -72,7 +71,7 @@ function AddWorkOrder() {
               <IconButton
                 onClick={() => {
                   setShowConfirm(true);
-                  setWorkOrderId(item.partNumber);
+                  setWorkOrderId(item);
                 }}
               >
                 <DeleteIcon color="error" />
@@ -133,7 +132,21 @@ function AddWorkOrder() {
     return result;
   }, [products]);
 
+  const schema = () => ({
+    productName: Joi.string().trim().required().label("Select Product"),
+    quantity: Joi.number()
+      .integer()
+      .min(1)
+      .required()
+      .label("Number of Items to Produce"),
+  });
+
   const handleAdd = useCallback(() => {
+    const newData = workOrderItems;
+    let validateForm = validateServices.validateForm(inputData, schema());
+    if (validateForm) {
+      setErrors(validateForm);
+    }
     if (!selectedProduct?.productItems) return;
 
     const existingProduct = workOrderItems.find(
@@ -155,6 +168,7 @@ function AddWorkOrder() {
       quantity: "",
       productName: "",
     });
+    setSelectedProduct(null);
     setDescription(description);
     console.log(workOrderItems);
     setWorkOrderItems([...workOrderItems]);
@@ -164,22 +178,23 @@ function AddWorkOrder() {
     return Date.now().toString();
   };
 
-  const handleChange = ({ target: { value, name } }) => {
-    let newInputData = { ...inputData };
-    newInputData[name] = value;
-    setInputData(newInputData);
+  const handleChange = ({ target: { value, name } }, option) => {
+    const newData = { ...inputData };
+    console.log(value);
+    if (name === "productName") {
+      newData.productName = option ? option.productName : "";
+      //newData.partDescription = option ? option.partDescription : "";
+    } else {
+      newData[name] = value;
+      setErrors("");
+    }
+    if (option || name === "productName") {
+      setSelectedProduct(option);
+      setErrors("");
+    }
+    if (option) setSelectedProduct(option);
+    setInputData(newData);
   };
-
-  const schema = () => ({
-    workOrderNumber: Joi.string().required().label("WorkOrder Number"),
-    quantity: Joi.number()
-      .integer()
-      .min(1)
-      .required()
-      .label("Number of Items to Produce"),
-
-    productName: Joi.string().required().label("Select Product"),
-  });
 
   const handleSubmit = useCallback(
     async (e) => {
@@ -187,7 +202,6 @@ function AddWorkOrder() {
 
       let consolidatedItems = [];
       for (let product of workOrderItems) {
-        console.log(workOrderItems);
         product.productItems.forEach((item) => {
           const effectiveQuantity = item.quantity * product.quantity;
 
@@ -236,7 +250,6 @@ function AddWorkOrder() {
     [inputData]
   );
 
-  // };
   const getCustomOptionForProduct = (option) => {
     return {
       id: option?._id,
@@ -250,22 +263,13 @@ function AddWorkOrder() {
     setWorkOrderId("");
   };
 
-  // To delete purchase part numbers
+  // To delete workOrders part numbers
   const onDeletePartNumber = () => {
-    let filterItem = workOrderItems.filter(
-      (items) => items.partNumber !== workOrderId
-    );
+    let filterItem = workOrderItems.filter((items) => items !== workOrderId);
 
     setWorkOrderItems(filterItem);
 
     onCancel();
-  };
-
-  const onProductChange = (e, option) => {
-    setSelectedProduct(option);
-
-    setErrors("");
-    setSelectedProductErrors("");
   };
 
   return (
@@ -320,12 +324,12 @@ function AddWorkOrder() {
             <div className="d-flex align-items-start gap-2 pb-4">
               <AutoComplete
                 options={groupedWorkOrderData}
-                name="selectedProduct"
+                name="productName"
                 label="Select Product"
-                onChange={onProductChange}
-                value={selectedProduct || []}
+                onChange={handleChange}
+                value={selectedProduct}
                 getCustomOption={getCustomOptionForProduct}
-                error={selectedProductErrors.selectedProduct}
+                error={errors.productName}
                 required
               />
 

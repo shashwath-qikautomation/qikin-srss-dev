@@ -44,7 +44,7 @@ function EditWorkOrder() {
   });
 
   const [selectedOption, setSelectedOption] = useState(null);
-  const [productItems, setProductItems] = useState([]);
+  const [workOrderItems, setWorkOrderItems] = useState([]);
   const [showAllPartNumbers, toggleShowAllPartNumbers] = useState(false);
   const [selectedInventoryForModal, setSelectedInventoryForModal] =
     useState(null);
@@ -115,7 +115,7 @@ function EditWorkOrder() {
         partNumber: m.partNumber,
         quantity: m.quantity,
       }));
-      setProductItems(newWorkList);
+      setWorkOrderItems(newWorkList);
       setFilteredWorkOrder(newWorkList);
     } else {
       console.error("No matched order found for ID:", id);
@@ -129,13 +129,13 @@ function EditWorkOrder() {
   });
 
   const onItemDelete = (item) => {
-    let newProductItems = [...productItems];
+    let newProductItems = [...workOrderItems];
     console.log(newProductItems);
     newProductItems = newProductItems.filter(
       (f) => f.partNumber !== item.partNumber
     );
     console.log(newProductItems);
-    setProductItems(newProductItems);
+    setWorkOrderItems(newProductItems);
   };
 
   const getData = useCallback(async () => {
@@ -190,7 +190,7 @@ function EditWorkOrder() {
   const onApproveWorkOrder = async () => {
     let isInventorySufficient = true;
 
-    productItems.forEach((item) => {
+    workOrderItems.forEach((item) => {
       const availableQuantity = getAvailableQuantity(item.partNumber);
       if (availableQuantity < item.quantity) {
         isInventorySufficient = false;
@@ -258,7 +258,7 @@ function EditWorkOrder() {
   }, [inventory]);
 
   const handleAdd = () => {
-    let newData = [...productItems];
+    let newData = [...workOrderItems];
     let validateForm = validateServices.validateForm(data, schema());
     if (validateForm) {
       setErrors(validateForm);
@@ -274,10 +274,10 @@ function EditWorkOrder() {
         });
       }
 
-      setProductItems(newData);
+      setWorkOrderItems(newData);
       setData({ ...data, quantity: "", partNumber: "", status: data.status });
       setDescription(description);
-      console.log(productItems);
+      console.log(workOrderItems);
       setSelectedOption(null);
       setErrors("");
     }
@@ -287,7 +287,7 @@ function EditWorkOrder() {
   const handleSave = async () => {
     const updateItem = await workOrderServices.updateWorkOrder({
       description,
-      items: productItems,
+      items: workOrderItems,
       _id: product._id,
     });
     if (updateItem) {
@@ -309,7 +309,6 @@ function EditWorkOrder() {
           activePath={routes.inventory}
         />
       </div>
-      <div className=" px-2  d-flex justify-content-between"></div>
       <Container maxWidth="xxl">
         <Card className="shadow-sm d-grid gap-3 p-3">
           <div className="d-grid gap-3">
@@ -343,10 +342,20 @@ function EditWorkOrder() {
                   />
                 </div>
               </Card>
-              <div className="d-grid gap-2 mt-2">
+              <div className="d-flex gap-2 mt-2">
+                <Button
+                  name="save"
+                  onClick={handleSave}
+                  isLoading={isLoading}
+                  disabled={data.status === 1 || workOrderItems.length === 0}
+                />
                 <Button
                   name="Approve"
-                  disabled={data.status === 1 ? true : false}
+                  disabled={
+                    data.status === 1 || workOrderItems.length === 0
+                      ? true
+                      : false
+                  }
                   onClick={() => onApproveWorkOrder(null)}
                 />
               </div>
@@ -386,7 +395,7 @@ function EditWorkOrder() {
             </div>
           </div>
           <DataTable
-            rows={productItems}
+            rows={workOrderItems}
             columns={columns}
             sortColumn={sortColumn}
             sortOrder={sortOrder}
@@ -397,20 +406,12 @@ function EditWorkOrder() {
             setCurrentPage={setCurrentPage}
             setRowsPerPage={setRowsPerPage}
           />
-          <div className="modal-btn d-flex justify-content-end">
-            <Button
-              name="save"
-              onClick={handleSave}
-              isLoading={isLoading}
-              disabled={data.status === 1}
-            />
-          </div>
         </Card>
         {showWorkOrder && (
           <Modal onClose={handleModalClose} title="">
             <ApproveWorkOrder
               handleModalClose={handleModalClose}
-              productItems={productItems}
+              workOrderItems={workOrderItems}
             />
           </Modal>
         )}

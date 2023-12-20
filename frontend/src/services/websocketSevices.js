@@ -118,6 +118,12 @@ export const listenToData = (socket, dispatch, currentUser) => {
       inventoryList[index] = dataFromSocket.id;
       dispatch({ type: INVENTORY, payload: inventoryList });
     }
+    if (dataFromSocket.status === 3) {
+      //to delete product item
+      let inventoryList = [...inventory];
+      inventoryList = inventory.filter((e) => e._id !== dataFromSocket.id);
+      dispatch({ type: INVENTORY, payload: inventoryList });
+    }
   });
 
   // to Products

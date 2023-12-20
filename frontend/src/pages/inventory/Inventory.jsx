@@ -1,12 +1,11 @@
 import React, { useCallback, useState, useEffect, useMemo } from "react";
 import { useDispatch, useSelector } from "react-redux";
-import { Card, Container, InputAdornment } from "@mui/material";
+import { Card, Container, InputAdornment, IconButton } from "@mui/material";
 import _ from "lodash";
 
 import CheckIcon from "@mui/icons-material/Check";
 import CloseIcon from "@mui/icons-material/Close";
 import EditIcon from "@mui/icons-material/Edit";
-import IconButton from "@mui/icons-material/Close";
 import Input from "../../components/Input";
 import DataTable from "../../components/table/DataTable";
 import Button from "../../components/Button";
@@ -17,6 +16,9 @@ import { updateInventory } from "../../redux/action";
 import { workOrder } from "../../redux/action";
 import { routes } from "../../helper/routes";
 import Breadcrumbs from "../../components/Breadcrumbs";
+import ExportTableData from "../../components/ExportTableData";
+import Delete from "@mui/icons-material/Delete";
+import ConfirmBox from "../../components/ConfirmBox";
 
 function Inventory() {
   const dispatch = useDispatch();
@@ -34,6 +36,8 @@ function Inventory() {
   const [manufactureData, setManufactureData] = useState("");
   const [inventoryId, setInventoryId] = useState("");
   const [inventoryData, setInventoryData] = useState([]);
+  const [hiddenColumns, setHiddenColumns] = useState({});
+  const [showConfirmBox, toggleConfirmBox] = useState(false);
 
   const [showAddInventory, setShowInventoryOrder] = useState(false);
 
@@ -117,7 +121,7 @@ function Inventory() {
       columnStyle: { width: "5%" },
       content: (e, i) => {
         return (
-          <>
+          <div className="d-flex align-items-center">
             {!(showDescription && index === i) ? (
               <EditIcon color="primary" onClick={() => onAddInventory(e)}>
                 <IconButton />
@@ -135,7 +139,10 @@ function Inventory() {
                 </div>
               </>
             )}
-          </>
+            <IconButton onClick={() => confirmDelete(e)}>
+              <Delete color="error" />
+            </IconButton>
+          </div>
         );
       },
     },
@@ -159,7 +166,11 @@ function Inventory() {
   const dataTableSearch = (dataToFilter) => {
     let filtered = dataToFilter.filter(
       (f) =>
-        f?.partName
+        f?.part
+          ?.toString()
+          .toLowerCase()
+          .includes(search.trim().toLowerCase()) ||
+        f?.partNumber
           ?.toString()
           .toLowerCase()
           .includes(search.trim().toLowerCase()) ||
@@ -181,6 +192,11 @@ function Inventory() {
           .includes(search.trim().toLowerCase())
     );
     return filtered;
+  };
+
+  const confirmDelete = (selectedInventory) => {
+    setSelectedInventory(selectedInventory);
+    toggleConfirmBox(true);
   };
 
   const sortedInventoryList = useMemo(() => {
@@ -232,6 +248,24 @@ function Inventory() {
     setSelectedInventory(null);
   }, []);
 
+  const manageColumns = useCallback(
+    (column, checked) => {
+      const updated = { ...hiddenColumns };
+      updated[column] = checked;
+      setHiddenColumns(updated);
+    },
+    [hiddenColumns]
+  );
+
+  // to delete inventory items
+  const deleteInventory = async () => {
+    const deleted = await inventoryServices.deleteInventory(selectedInventory);
+    console.log(deleted);
+    if (deleted) {
+      toggleConfirmBox(false);
+    }
+  };
+
   return (
     <div className="d-grid gap-2 mt-2 px-2">
       <div className="px-3 py-2 d-flex justify-content-between">
@@ -273,9 +307,18 @@ function Inventory() {
               />
             </div>
             <div className="d-flex justify-content-end">
-              <Button
-                name={"Add Component"}
-                onClick={() => onAddInventory(null)}
+              <div className="px-2">
+                <Button
+                  name={"Add Component"}
+                  onClick={() => onAddInventory(null)}
+                />
+              </div>
+              <ExportTableData
+                columns={columns}
+                tableData={sortedInventoryList}
+                hiddenColumns={hiddenColumns}
+                fileName={"Inventory Details"}
+                tableHeader={"Inventory List Details"}
               />
             </div>
             <DataTable
@@ -304,6 +347,15 @@ function Inventory() {
           </Modal>
         )}
       </Container>
+      <ConfirmBox
+        showConfirm={showConfirmBox}
+        content="Are You Sure Want To Delete"
+        title="Delete"
+        onAgree={deleteInventory}
+        onCancel={() => {
+          toggleConfirmBox(false);
+        }}
+      />
     </div>
   );
 }

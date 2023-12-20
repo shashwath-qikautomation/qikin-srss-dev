@@ -20,6 +20,7 @@ import Chip from "@mui/material/Chip";
 import Stack from "@mui/material/Stack";
 import Status from "../work-order/enum";
 import Breadcrumbs from "../../components/Breadcrumbs";
+import ExportTableData from "../../components/ExportTableData";
 
 const PurchaseOrders = () => {
   const navigate = useNavigate();
@@ -36,6 +37,7 @@ const PurchaseOrders = () => {
   const [showDetails, setShowDetails] = useState(null);
   const [search, setSearch] = useState("");
   const [purchaseOrderData, setPurchaseOrderData] = useState([]);
+  const [hiddenColumns, setHiddenColumns] = useState({});
 
   useEffect(() => {
     getData();
@@ -203,6 +205,15 @@ const PurchaseOrders = () => {
     onCancel();
   };
 
+  const manageColumns = useCallback(
+    (column, checked) => {
+      const updated = { ...hiddenColumns };
+      updated[column] = checked;
+      setHiddenColumns(updated);
+    },
+    [hiddenColumns]
+  );
+
   return (
     <div className="d-grid m-2 gap-3 mb-3">
       <div className="px-3 py-2 d-flex justify-content-between">
@@ -244,7 +255,21 @@ const PurchaseOrders = () => {
                   }}
                 />
               </div>
-              <Button name={"Add Purchase Order"} onClick={addPurchaseOrder} />
+              <div className="d-flex">
+                <div className="px-2">
+                  <Button
+                    name={"Add Purchase Order"}
+                    onClick={addPurchaseOrder}
+                  />
+                </div>
+                <ExportTableData
+                  columns={columns}
+                  tableData={sortedPurchaseList}
+                  hiddenColumns={hiddenColumns}
+                  fileName={"Purchase Order Details"}
+                  tableHeader={"Purchase Order Details"}
+                />
+              </div>
             </div>
             <DataTable
               columns={columns}

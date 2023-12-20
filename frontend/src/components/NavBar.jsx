@@ -27,15 +27,15 @@ function NavBar() {
             <img src={logoW} alt="logo" height={"50"} />
           </a>
           <div className="navLinkContainer">
-            <NavLink
+            {/* <NavLink
               to={routes.inventory}
               className={({ isActive }) => {
                 return `navLink ${isActive ? " activeNav " : ""}`;
               }}
             >
               {"Inventory"}
-            </NavLink>
-            <NavLink
+            </NavLink> */}
+            {/* <NavLink
               to={routes.products}
               className={({ isActive }) => {
                 return `navLink ${isActive ? " activeNav " : ""}`;
@@ -58,15 +58,15 @@ function NavBar() {
               }}
             >
               {"Purchase Orders"}
-            </NavLink>
-            <NavLink
+            </NavLink> */}
+            {/* <NavLink
               to={routes.settings}
               className={({ isActive }) => {
                 return `navLink ${isActive ? " activeNav " : ""}`;
               }}
             >
               {"Settings"}
-            </NavLink>
+            </NavLink> */}
           </div>
         </div>
 

@@ -128,6 +128,7 @@ exports.delete = async (req, res) => {
     db.inventory
       .findByIdAndRemove(req.params.id)
       .then((data) => {
+        inventorySocketIo(req.params.id, 3);
         return res.json("Successfully deleted");
       })
       .catch((err) => {
