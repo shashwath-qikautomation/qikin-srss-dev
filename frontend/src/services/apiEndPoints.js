@@ -8,6 +8,7 @@ const apiEndPoints = {
   user: "user",
   role: "role",
   purchase: "purchase",
+  vendor: "vendors",
 };
 
 export default apiEndPoints;

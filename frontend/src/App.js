@@ -31,6 +31,7 @@ import AddWorkOrder from "./pages/work-order/AddWorkOrder";
 import EditWorkOrder from "./pages/work-order/editWorkOrder";
 import PurchaseWorkOrder from "./pages/work-order/purchaseWorkOrder";
 import EditPurchaseOrder from "./pages/purchase-order/EditPurchaseOrder";
+import VendorsInventory from "./pages/vendors/VendorsInventory";
 
 function App() {
   const { currentUser } = useSelector((state) => state);
@@ -81,6 +82,14 @@ function App() {
           element={
             <ProtectedRoute>
               <Inventory />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path={routes.vendorsInventory}
+          element={
+            <ProtectedRoute>
+              <VendorsInventory />
             </ProtectedRoute>
           }
         />

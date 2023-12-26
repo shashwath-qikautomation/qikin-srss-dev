@@ -84,6 +84,7 @@ exports.update = async (req, res) => {
     db.purchase
       .findByIdAndUpdate(req.params.id, req.body)
       .then(async (data) => {
+        console.log(data);
         if (req.body.status == 1) {
           let poList = await db.purchase.findById(req.params.id);
           incertMany(poList.items, poList.description);

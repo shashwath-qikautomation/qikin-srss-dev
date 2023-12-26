@@ -101,6 +101,7 @@ require("./app/routes/bom.route")(app);
 require("./app/routes/workOrder.route")(app);
 require("./app/routes/role.route")(app);
 require("./app/routes/purchase.routes")(app);
+require("./app/routes/vendors.routes")(app);
 
 const PORT = 8081;
 

@@ -5,15 +5,6 @@ const config = require("../../config/constant");
 const { userSocketIo } = require("../../other/user");
 const { sendMessage } = require("../../../socket-io");
 
-// setTimeout(async () => {
-//   try {
-//     console.log("hi");
-//     await sendMessage("data/USER", "data/USER", "data");
-//   } catch (error) {
-//     console.log(error);
-//   }
-// }, 6000);
-//Create New user
 exports.createUser = async (req, res, io) => {
   try {
     db.user

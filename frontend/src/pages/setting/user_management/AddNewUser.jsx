@@ -97,7 +97,7 @@ const AddNewUser = () => {
     setIsLoading(true);
 
     let validateForm = validateServices.validateForm(selectedUser, schema()); //inputData
-    // console.log(validateForm);
+
     if (validateForm) {
       setErrors(validateForm);
     } else if (

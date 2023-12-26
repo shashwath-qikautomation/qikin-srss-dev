@@ -10,16 +10,21 @@ import validateServices from "../../services/validateServices";
 import Button from "../../components/Button";
 import Input from "../../components/Input";
 import { routes } from "../../helper/routes";
-import { updateBOMList, updateWorkOrder } from "../../redux/action/index";
+import {
+  updateBOMList,
+  updateWorkOrder,
+  updateVendors,
+} from "../../redux/action/index";
 import bomServices from "../../services/BOMservices";
 import workOrderServices from "../../services/workOrderServices";
 import { IconButton } from "@mui/material";
 import DeleteIcon from "@mui/icons-material/Delete";
 import ConfirmBox from "../../components/ConfirmBox";
 import Breadcrumbs from "../../components/Breadcrumbs";
+import vendorsServices from "../../services/vendorsInventoryServices";
 
 function AddWorkOrder() {
-  const { products, workOrders } = useSelector((state) => state);
+  const { products, workOrders, vendorsList } = useSelector((state) => state);
   const { id } = useParams();
   const [errors, setErrors] = useState("");
   const navigate = useNavigate();
@@ -28,8 +33,10 @@ function AddWorkOrder() {
     workOrderNumber: "",
     productName: "",
     quantity: "",
+    vendor: "",
   });
   const [selectedProduct, setSelectedProduct] = useState(null);
+  const [selectedVendor, setSelectedVendor] = useState(null);
   const [workOrderItems, setWorkOrderItems] = useState([]);
   const [isLoading, toggleLoading] = useState(false);
   const [productName, setProductName] = useState("");
@@ -38,7 +45,7 @@ function AddWorkOrder() {
   const [workOrderId, setWorkOrderId] = useState("");
   const [showConfirm, setShowConfirm] = useState(false);
   const dispatch = useDispatch();
-
+  console.log(inputData);
   const [workOrderName, setWorkOrderName] = useState(false);
 
   const columns = [
@@ -86,13 +93,15 @@ function AddWorkOrder() {
 
   const getData = useCallback(async () => {
     toggleLoading(true);
-    const [productData, workOrderData] = await Promise.all([
+    const [productData, workOrderData, vendorsData] = await Promise.all([
       bomServices.getBOMList(),
       workOrderServices.getWorkOrders(),
+      vendorsServices.getVendors(),
     ]);
 
     dispatch(updateBOMList(productData));
     dispatch(updateWorkOrder(workOrderData));
+    dispatch(updateVendors(vendorsData));
     toggleLoading(false);
   }, [dispatch]);
 
@@ -131,6 +140,26 @@ function AddWorkOrder() {
 
     return result;
   }, [products]);
+
+  const groupedVendorsName = useMemo(() => {
+    let result = [];
+    let seenVendorNames = new Set();
+    let filtered = [vendorsList];
+
+    let flattenedFiltered = filtered.flat();
+
+    flattenedFiltered.forEach((item) => {
+      if (item && item.name) {
+        if (!seenVendorNames.has(item.name)) {
+          result.push(item);
+
+          seenVendorNames.add(item.name);
+        }
+      }
+    });
+
+    return result;
+  }, [vendorsList]);
 
   const schema = () => ({
     productName: Joi.string().trim().required().label("Select Product"),
@@ -177,7 +206,7 @@ function AddWorkOrder() {
   const generateWorkOrderNumber = () => {
     return Date.now().toString();
   };
-
+  console.log(selectedVendor);
   const handleChange = ({ target: { value, name } }, option) => {
     const newData = { ...inputData };
     console.log(value);
@@ -193,6 +222,25 @@ function AddWorkOrder() {
       setErrors("");
     }
     if (option) setSelectedProduct(option);
+
+    setInputData(newData);
+  };
+
+  const handleChangeVendor = ({ target: { value, name } }, option) => {
+    const newData = { ...inputData };
+
+    if (name === "vendor") {
+      newData.vendor = option ? option.name : "";
+      //newData.partDescription = option ? option.partDescription : "";
+    } else {
+      newData[name] = value;
+      setErrors("");
+    }
+    if (option || name === "vendor") {
+      setSelectedVendor(option);
+      setErrors("");
+    }
+    if (option) setSelectedVendor(option);
     setInputData(newData);
   };
 
@@ -237,6 +285,7 @@ function AddWorkOrder() {
           workOrderNumber:
             inputData.workOrderNumber || generateWorkOrderNumber(),
           description,
+          //vendorId: selectedVendor._id,
           items: consolidatedItems,
         });
         console.log(added);
@@ -250,10 +299,19 @@ function AddWorkOrder() {
     [inputData]
   );
 
+  // custom option for Product
   const getCustomOptionForProduct = (option) => {
     return {
       id: option?._id,
       label: option?.productName || "",
+    };
+  };
+
+  // custom option for vendor
+  const getCustomOptionForVendor = (option) => {
+    return {
+      id: option?._id,
+      label: option?.name || "",
     };
   };
 
@@ -319,7 +377,6 @@ function AddWorkOrder() {
               label="Description"
               value={description}
               onChange={(e) => setDescription(e.target.value)}
-              required
             />
             <div className="d-flex align-items-start gap-2 pb-4">
               <AutoComplete
@@ -330,6 +387,16 @@ function AddWorkOrder() {
                 value={selectedProduct}
                 getCustomOption={getCustomOptionForProduct}
                 error={errors.productName}
+                required
+              />
+              <AutoComplete
+                options={groupedVendorsName}
+                name="vendor"
+                label="Select Vendor"
+                onChange={handleChangeVendor}
+                value={selectedVendor}
+                getCustomOption={getCustomOptionForVendor}
+                error={errors.vendor}
                 required
               />
 

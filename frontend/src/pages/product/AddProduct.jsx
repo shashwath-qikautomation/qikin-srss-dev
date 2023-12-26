@@ -296,7 +296,6 @@ function AddProduct() {
               onChange={({ target: { value } }) => {
                 setDescription(value);
               }}
-              required
             />
             <div className="d-flex gap-2 align-items-start">
               <div className="d-grid gap-2">

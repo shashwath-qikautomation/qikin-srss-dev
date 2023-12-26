@@ -5,6 +5,7 @@ const socketEvents = {
   INVENTORY: "data/INVENTORY",
   PRODUCTS: "data/PRODUCTS",
   PURCHASE: "data/PURCHASE",
+  VENDORS: "data/VENDORS",
 };
 
 export default socketEvents;

@@ -31,7 +31,11 @@ const HomePage = () => {
             <br />
             <div className="w-75 text-break">Inventory</div>
           </DashboardCard>
-
+          <DashboardCard path={routes.vendorsInventory} onClick={onCardClick}>
+            <InventoryIcon />
+            <br />
+            <div className="w-75 text-break">Vendors Inventory</div>
+          </DashboardCard>
           <DashboardCard path={routes.products} onClick={onCardClick}>
             <ManufacturingIcon />
             <br />

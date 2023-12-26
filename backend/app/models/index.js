@@ -14,5 +14,6 @@ db.bom = require("../models/bom.model.js")(mongoose);
 db.workOrder = require("../models/workOrder.model.js")(mongoose);
 db.role = require("../models/role.model.js")(mongoose);
 db.purchase = require("../models/purchase.model.js")(mongoose);
+db.vendor = require("../models/vendor.model.js")(mongoose);
 
 module.exports = db;

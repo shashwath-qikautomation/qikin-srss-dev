@@ -120,38 +120,45 @@ function ApproveWorkOrder({ handleModalClose, workOrderItems }) {
   });*/
 
   const handlePurchaseOrderClick = () => {
-    let loopProduct = workOrderItems.map((items) => {
+    let productQuantity = workOrderItems.map((items) => {
       return items.quantity;
     });
 
-    let loopPartnumber = workOrderItems.map((items) => items.partNumber);
+    let productPartnumber = workOrderItems.map((items) => items.partNumber);
 
-    let loopInventory = inventory.filter((element) =>
-      loopPartnumber.some((item) => item === element.partNumber)
+    let inventoryPartnumber = inventory.filter((element) =>
+      productPartnumber.some((item) => item === element.partNumber)
     );
 
-    let availableItems = loopInventory.map(
-      (getquantity) => getquantity.quantity
+    let availItem = workOrderItems.map((item) => {
+      const availableQuantity = calculateAvailableQuantity(item.partNumber);
+      return {
+        ...item,
+        availableQuantity,
+      };
+    });
+
+    let availableItems = availItem.map(
+      (getquantity) => getquantity.availableQuantity
     );
-    console.log(availableItems);
+
     let resultPartnumber = [];
     let resultQuantity = [];
 
     for (let i = 0; i < workOrderItems.length; i++) {
-      if (workOrderItems[i].quantity > loopInventory[i].quantity) {
+      if (workOrderItems[i].quantity > inventoryPartnumber[i].quantity) {
         resultPartnumber.push(workOrderItems[i].partNumber);
       }
     }
     let purchasePartnumbers = resultPartnumber;
 
-    for (let i = 0; i < loopProduct.length; i++) {
-      if (loopProduct[i] > availableItems[i]) {
-        resultQuantity.push(loopProduct[i] - availableItems[i]);
+    for (let i = 0; i < productQuantity.length; i++) {
+      if (productQuantity[i] > availableItems[i]) {
+        resultQuantity.push(productQuantity[i] - availableItems[i]);
       }
     }
 
     let shortageItems = resultQuantity;
-    console.log(shortageItems);
 
     navigate(routes.addProducts, {
       state: {

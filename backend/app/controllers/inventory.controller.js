@@ -98,7 +98,7 @@ exports.upsert = async (req, res) => {
     if (existingItem) {
       existingItem.quantity =
         parseInt(existingItem.quantity) + parseInt(req.body.quantity);
-
+      console.log(req.body.quantity);
       const updatedItem = await existingItem.save();
       return res.status(200).send(updatedItem);
     } else {

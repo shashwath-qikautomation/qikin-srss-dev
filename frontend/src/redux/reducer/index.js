@@ -8,6 +8,7 @@ import {
   ROLE,
   SETTINGS,
   PURCHASE_LIST,
+  VENDORS_LIST,
 } from "../action";
 
 const initialState = {
@@ -36,6 +37,7 @@ const initialState = {
     },
   ],
   purchaseList: [],
+  vendorsList: [],
   settings: {},
 };
 
@@ -59,6 +61,8 @@ const reducer = (state = initialState, action) => {
       return { ...state, settings: action.payload };
     case PURCHASE_LIST:
       return { ...state, purchaseList: action.payload };
+    case VENDORS_LIST:
+      return { ...state, vendorsList: action.payload };
     default:
       return state;
   }

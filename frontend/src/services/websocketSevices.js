@@ -9,6 +9,7 @@ import {
   ROLE,
   SETTINGS,
   PURCHASE_LIST,
+  VENDORS_LIST,
 } from "../redux/action";
 import socketEvents from "./webSocketEvents";
 
@@ -180,6 +181,34 @@ export const listenToData = (socket, dispatch, currentUser) => {
         (workOrder) => workOrder._id !== dataFromSocket.id
       );
       dispatch({ type: WORK_ORDERS, payload: workOrder });
+    }
+  });
+
+  // TO Vendors
+  socket.on(socketEvents.VENDORS, async (dataFromSocket) => {
+    let { vendorsList } = store.getState();
+    console.log(dataFromSocket.id);
+    if (dataFromSocket.status === 1) {
+      //to add Vendors
+      let vendor = [...vendorsList];
+      vendor.push(dataFromSocket.id);
+      dispatch({ type: VENDORS_LIST, payload: vendor });
+    }
+    if (dataFromSocket.status === 2) {
+      //to update Vendors
+      let vendor = [...vendorsList];
+      let itemFound = vendor.find(
+        (vendor) => vendor._id === dataFromSocket.id._id
+      );
+      let index = vendor.indexOf(itemFound);
+      vendor[index] = dataFromSocket.id;
+      dispatch({ type: VENDORS_LIST, payload: vendor });
+    }
+    if (dataFromSocket.status === 3) {
+      //to delete Vendors
+      let vendor = [...vendorsList];
+      vendor = vendor.filter((vendor) => vendor._id !== dataFromSocket.id);
+      dispatch({ type: VENDORS_LIST, payload: vendor });
     }
   });
 };

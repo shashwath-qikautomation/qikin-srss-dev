@@ -8,6 +8,10 @@ module.exports = (mongoose) => {
         default: 0,
       },
       productName: String,
+      vendorId: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "vendor",
+      },
       items: [
         {
           partNumber: String,
