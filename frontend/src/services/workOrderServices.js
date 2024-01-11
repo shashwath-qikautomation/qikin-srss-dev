@@ -27,6 +27,7 @@ const getWorkOrderData = async (id) => {
 };
 
 const addWorkOrder = async (workOrder) => {
+  console.log(workOrder);
   try {
     const { status, data } = await http.post(
       apiEndPoints.serverPath + apiEndPoints.workOrders,

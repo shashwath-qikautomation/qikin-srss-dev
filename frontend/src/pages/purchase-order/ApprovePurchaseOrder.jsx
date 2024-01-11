@@ -9,18 +9,20 @@ import validateServices from "../../helper/validateServices";
 import { updateInventory } from "../../redux/action/index";
 import DataTable from "../../components/table/DataTable";
 import { routes } from "../../helper/routes";
-import workOrderServices from "../../services/workOrderServices";
-function ApproveWorkOrder({
+import purchaseServices from "../../services/purchaseServices";
+
+function ApprovePurchaseOrder({
   handleModalClose,
-  workOrderItems,
-  data,
+  purchasedItems,
+  purchaseInput,
   description,
   product,
   setShowWorkOrder,
   disabled,
   approveDisabled,
+  id,
 }) {
-  console.log(workOrderItems);
+  console.log(purchasedItems);
 
   const dispatch = useDispatch();
   const { inventory } = useSelector((state) => state);
@@ -32,7 +34,6 @@ function ApproveWorkOrder({
   const [rowsPerPage, setRowsPerPage] = useState(10);
   const [inventoryDetails, setInventoryDetails] = useState();
   const [errors, setErrors] = useState({});
-  const [isLoading, toggleLoading] = useState(false);
 
   const columns = [
     {
@@ -57,12 +58,12 @@ function ApproveWorkOrder({
 
     {
       path: "quantity",
-      label: "Required Quantity",
-      content: useCallback((inventory, i) => {
+      label: "Purchased Quantity",
+      content: useCallback((purchase, i) => {
         return (
           <div>
             {" "}
-            <p>{inventory.quantity}</p>
+            <p>{purchase.quantity}</p>
           </div>
         );
       }),
@@ -70,11 +71,11 @@ function ApproveWorkOrder({
     {
       path: "Available Quantity",
       label: "Available Quantity",
-      content: useCallback((workOrder, i) => {
+      content: useCallback((inventory, i) => {
         return (
           <div>
             {" "}
-            <p>{workOrder.availableQuantity || 0}</p>
+            <p>{inventory.availableQuantity || 0}</p>
           </div>
         );
       }),
@@ -95,63 +96,14 @@ function ApproveWorkOrder({
   );
 
   const productData = useMemo(() => {
-    return workOrderItems.map((item) => {
+    return purchasedItems.map((item) => {
       const availableQuantity = calculateAvailableQuantity(item.partNumber);
       return {
         ...item,
         availableQuantity,
       };
     });
-  }, [workOrderItems, calculateAvailableQuantity]);
-
-  const handlePurchaseOrderClick = () => {
-    let productQuantity = workOrderItems.map((items) => {
-      return items.quantity;
-    });
-
-    let productPartnumber = workOrderItems.map((items) => items.partNumber);
-
-    let inventoryPartnumber = inventory.filter((element) =>
-      productPartnumber.some((item) => item === element.partNumber)
-    );
-
-    let availItem = workOrderItems.map((item) => {
-      const availableQuantity = calculateAvailableQuantity(item.partNumber);
-      return {
-        ...item,
-        availableQuantity,
-      };
-    });
-
-    let availableItems = availItem.map(
-      (getquantity) => getquantity.availableQuantity
-    );
-
-    let resultPartnumber = [];
-    let resultQuantity = [];
-
-    for (let i = 0; i < workOrderItems.length; i++) {
-      if (workOrderItems[i].quantity > inventoryPartnumber[i].quantity) {
-        resultPartnumber.push(workOrderItems[i].partNumber);
-      }
-    }
-    let purchasePartnumbers = resultPartnumber;
-
-    for (let i = 0; i < productQuantity.length; i++) {
-      if (productQuantity[i] > availableItems[i]) {
-        resultQuantity.push(productQuantity[i] - availableItems[i]);
-      }
-    }
-
-    let shortageItems = resultQuantity;
-
-    navigate(routes.addProducts, {
-      state: {
-        data: purchasePartnumbers,
-        shortageQuantity: shortageItems,
-      },
-    });
-  };
+  }, [purchasedItems]);
 
   const getAvailableQuantity = (partNumber) => {
     console.log(partNumber);
@@ -168,39 +120,21 @@ function ApproveWorkOrder({
   };
 
   const navigateToWorkOrder = () => {
-    navigate(routes.workOrders);
+    navigate(routes.purchaseOrders);
   };
 
   const onApprove = async () => {
-    let isInventorySufficient = true;
+    if (id) {
+      let targetItem = purchaseInput;
+      targetItem.status = 1;
 
-    workOrderItems.forEach((item) => {
-      const availableQuantity = getAvailableQuantity(item.partNumber);
-      if (availableQuantity < item.quantity) {
-        isInventorySufficient = false;
-      }
-    });
+      let updated = await purchaseServices.updatePurchaseList({
+        ...targetItem,
+        _id: targetItem._id,
+      });
 
-    if (product) {
-      if (isInventorySufficient) {
-        const updatePromises = [];
-        const updatedWorkOrders = {
-          description,
-          items: product.items,
-          _id: product._id,
-        };
-        updatedWorkOrders.status = 1;
-        const workOrderUpdated = await workOrderServices.updateWorkOrder(
-          updatedWorkOrders
-        );
-        updatePromises.push(workOrderUpdated);
-        console.log(workOrderUpdated);
-        if (updatePromises) {
-          navigateToWorkOrder();
-        } else {
-        }
-      } else {
-        setShowWorkOrder(true);
+      if (updated) {
+        navigate(routes.purchaseOrders);
       }
     }
   };
@@ -211,16 +145,11 @@ function ApproveWorkOrder({
         <Button
           name="Approve"
           disabled={
-            data.status === 1 || workOrderItems.length === 0 || approveDisabled
+            purchaseInput.status === 1 || purchasedItems.length === 0
               ? true
               : false
           }
           onClick={onApprove}
-        />
-        <Button
-          name={"Purchase Order"}
-          disabled={disabled}
-          onClick={handlePurchaseOrderClick}
         />
       </div>
       <div className="d-grid gap-2 p-2">
@@ -241,4 +170,4 @@ function ApproveWorkOrder({
   );
 }
 
-export default ApproveWorkOrder;
+export default ApprovePurchaseOrder;

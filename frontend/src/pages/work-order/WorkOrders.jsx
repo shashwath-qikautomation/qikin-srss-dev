@@ -1,5 +1,5 @@
 import React, { useCallback, useState, useEffect, useMemo } from "react";
-import { Card, Container, InputAdornment } from "@mui/material";
+import { Card, Container, InputAdornment, Menu, MenuItem } from "@mui/material";
 import moment from "moment";
 import { useDispatch, useSelector } from "react-redux";
 import Chip from "@mui/material/Chip";
@@ -37,6 +37,10 @@ function WorkOrders() {
   const dispatch = useDispatch();
   const { workOrders } = useSelector((state) => state);
   const [hiddenColumns, setHiddenColumns] = useState({});
+  const [approvedDetails, setApproveDetails] = useState({
+    approvedName: "",
+    approvedDate: "",
+  });
 
   const columns = [
     {
@@ -76,6 +80,17 @@ function WorkOrders() {
       // },
     },
     {
+      path: "vendorName",
+      label: "Vendor Name",
+      getValue: (vendor) => {
+        return vendor?.vendorId?.name ? vendor.vendorId?.name : "";
+      },
+      content: useCallback((vendor) => {
+        return <div>{vendor?.vendorId?.name}</div>;
+      }, []),
+      sortable: true,
+    },
+    {
       path: "createdAt",
       label: "Created At",
       sortable: true,
@@ -113,6 +128,81 @@ function WorkOrders() {
                 ></Chip>
               </Stack>
             </Stack>
+            <Menu
+              anchorEl={showDetails}
+              id="account-menu"
+              open={Boolean(showDetails)}
+              onClose={() => {
+                setShowDetails(null);
+              }}
+              onClick={() => {
+                setShowDetails(null);
+              }}
+              PaperProps={{
+                elevation: 0,
+                sx: {
+                  minWidth: "20%",
+                  overflow: "visible",
+                  filter: "drop-shadow(0px 2px 8px rgba(0,0,0,0.32))",
+                  mt: 1.5,
+                  "& .MuiAvatar-root": {
+                    width: 32,
+                    height: 32,
+                    ml: -0.5,
+                    mr: 1,
+                  },
+                  "&:before": {
+                    content: '""',
+                    display: "block",
+                    position: "absolute",
+                    top: 0,
+                    right: 14,
+                    width: 10,
+                    height: 10,
+                    bgcolor: "background.paper",
+                    zIndex: 0,
+                  },
+                },
+              }}
+              className="p-2"
+              transformOrigin={{ horizontal: "right", vertical: "top" }}
+              anchorOrigin={{ horizontal: "right", vertical: "bottom" }}
+            >
+              <MenuItem>
+                <div className="d-grid gap-3 mb-3">
+                  {approvedDetails.approvedName && (
+                    <div>
+                      <div>
+                        {"workOrder.submittedBy"}:{" "}
+                        {approvedDetails.approvedName}
+                      </div>
+                      <div>
+                        {"workOrder.SubmittedDate"}:
+                        {moment(approvedDetails.approvedDate).format(
+                          "DD/MM/YYYY"
+                        )}
+                      </div>
+                    </div>
+                  )}
+
+                  {approvedDetails.pickUpName && (
+                    <div>
+                      <div>
+                        {"workOrder.pickupBy"}:{approvedDetails.pickUpName}
+                      </div>
+                      <div>
+                        {"workOrder.pickupDate"}:
+                        {approvedDetails.pickUpDate
+                          ? moment(approvedDetails.pickUpDate).format(
+                              "DD/MM/YYYY"
+                            )
+                          : ""}
+                      </div>
+                    </div>
+                  )}
+                </div>
+              </MenuItem>
+            </Menu>
           </div>
         );
       },
@@ -190,6 +280,8 @@ function WorkOrders() {
       sorted = _.orderBy(workorderData, ["workOrderNumber"], [sortOrder]);
     } else if (sortColumn === "description") {
       sorted = _.orderBy(workorderData, ["description"], [sortOrder]);
+    } else if (sortColumn === "vendorName") {
+      sorted = _.orderBy(workorderData, ["vendorName"], [sortOrder]);
     } else {
       sorted = _.orderBy(workorderData, [sortColumn], [sortOrder]);
     }

@@ -4,6 +4,8 @@ import DashboardCard from "../components/card";
 import InventoryIcon from "../assets/icons/inventoryIcon";
 import ManufacturingIcon from "../assets/icons/ManufacturingIcon";
 import SettingIcon from "../assets/icons/SettingIcon";
+import ProductsIcon from "../assets/icons/ProductsIcon";
+import PurchaseIcon from "../assets/icons/PurchaseIcon";
 import { routes } from "../helper/routes";
 import { useNavigate } from "react-router-dom";
 
@@ -31,13 +33,13 @@ const HomePage = () => {
             <br />
             <div className="w-75 text-break">Inventory</div>
           </DashboardCard>
-          <DashboardCard path={routes.vendorsInventory} onClick={onCardClick}>
+          <DashboardCard path={routes.vendors} onClick={onCardClick}>
             <InventoryIcon />
             <br />
-            <div className="w-75 text-break">Vendors Inventory</div>
+            <div className="w-75 text-break">Vendors</div>
           </DashboardCard>
           <DashboardCard path={routes.products} onClick={onCardClick}>
-            <ManufacturingIcon />
+            <ProductsIcon />
             <br />
             Products
           </DashboardCard>
@@ -47,7 +49,7 @@ const HomePage = () => {
             Work Orders
           </DashboardCard>
           <DashboardCard path={routes.purchaseOrders} onClick={onCardClick}>
-            <ManufacturingIcon />
+            <PurchaseIcon />
             <br />
             Purchase Orders
           </DashboardCard>

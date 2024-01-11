@@ -6,28 +6,25 @@ import { Card, IconButton, InputAdornment } from "@mui/material";
 import { Container } from "@mui/system";
 
 import { useDispatch, useSelector } from "react-redux";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, Link } from "react-router-dom";
 import Button from "../../components/Button";
 import ConfirmBox from "../../components/ConfirmBox";
 import DataTable from "../../components/table/DataTable";
 import Input from "../../components/Input";
 import Modal from "../../components/Modal";
-import UploadBOM from "./productBom";
 import { routes } from "../../helper/routes";
-import bomServices from "../../services/BOMservices";
 import _ from "lodash";
 import moment from "moment";
-import { updateBOMList } from "../../redux/action";
 import Breadcrumbs from "../../components/Breadcrumbs";
-import ExportTableData from "../../components/ExportTableData";
+import AddVendors from "./AddVendors";
+import { updateVendors } from "../../redux/action";
+import vendorsServices from "../../services/vendorsInventoryServices";
 
-function ProductPage() {
-  const [showBOMUpload, toggleBOMUpload] = useState(false);
-  const [selectedProduct, setSelectedProduct] = useState(null);
+function Vendors() {
+  const [selectedVendor, setSelectedVendor] = useState(null);
   const [isPageLoading, togglePageLoading] = useState(false);
   const [showConfirmBox, toggleConfirmBox] = useState(false);
-  const { products } = useSelector((state) => state);
-
+  const { vendorsList } = useSelector((state) => state);
   const [search, setSearch] = useState("");
   const dispatch = useDispatch();
   const navigate = useNavigate();
@@ -37,6 +34,7 @@ function ProductPage() {
   const [currentPage, setCurrentPage] = useState(0);
   const [rowsPerPage, setRowsPerPage] = useState(10);
   const [hiddenColumns, setHiddenColumns] = useState({});
+  const [showAddVendorsInventory, setShowAddVendorsInventory] = useState(false);
 
   const columns = [
     {
@@ -48,22 +46,40 @@ function ProductPage() {
       columnStyle: { width: "3%" },
     },
     {
-      path: "productName",
-      label: "Product",
+      path: "name",
+      label: "Name",
       sortable: true,
-      content: (product) => {
+      content: (vendor) => {
         return (
           <div>
-            <p>{product.productName || "-"}</p>
+            <Link to={`${routes.vendorsInventory}` + "/" + vendor._id}>
+              {vendor.name || "-"}
+            </Link>
           </div>
         );
       },
     },
     {
-      path: "description",
-      label: "Description",
-      content: useCallback((product) => {
-        return <div>{product?.description}</div>;
+      path: "email",
+      label: "Email",
+      content: useCallback((vendor) => {
+        return <div>{vendor?.email}</div>;
+      }, []),
+      sortable: true,
+    },
+    {
+      path: "phoneNumber",
+      label: "Phone Number",
+      content: useCallback((vendor) => {
+        return <div>{vendor?.phoneNumber}</div>;
+      }, []),
+      sortable: true,
+    },
+    {
+      path: "address",
+      label: "Address",
+      content: useCallback((vendor) => {
+        return <div>{vendor?.address}</div>;
       }, []),
       sortable: true,
     },
@@ -84,16 +100,12 @@ function ProductPage() {
       path: "edit",
       label: "Actions",
       nonExportable: true,
-      content: (product) => (
+      content: (vendor) => (
         <div className="d-flex">
-          <IconButton
-            onClick={() => {
-              navigate(routes.editProduct + "/" + product._id);
-            }}
-          >
+          <IconButton onClick={() => onAddInventory(vendor)}>
             <Edit color="primary" />
           </IconButton>
-          <IconButton onClick={() => confirmDelete(product)}>
+          <IconButton onClick={() => confirmDelete(vendor._id)}>
             <Delete color="error" />
           </IconButton>
         </div>
@@ -105,21 +117,14 @@ function ProductPage() {
 
   const getData = useCallback(async () => {
     togglePageLoading(true);
-    const productPayload = await bomServices.getBOMList();
-    dispatch(updateBOMList(productPayload));
+    const vendorPayload = await vendorsServices.getVendors();
+    dispatch(updateVendors(vendorPayload));
     togglePageLoading(false);
   }, [dispatch]);
 
   useEffect(() => {
     getData();
   }, []);
-
-  const manageColumns = (column, checked) => {
-    const updated = { ...hiddenColumns };
-    updated[column] = checked;
-
-    setHiddenColumns(updated);
-  };
 
   const dataTableSearch = (dataToFilter) => {
     let filtered = dataToFilter.filter(
@@ -137,30 +142,18 @@ function ProductPage() {
   };
 
   useMemo(() => {
-    let filtered = products;
+    let filtered = vendorsList;
 
     if (search) {
       filtered = dataTableSearch(filtered);
     }
     setProductData(filtered);
-  }, [products, search]);
+  }, [vendorsList, search]);
 
-  const confirmDelete = (product) => {
-    console.log(product);
-    setSelectedProduct(product);
+  const confirmDelete = (vendor) => {
+    console.log(vendor);
+    setSelectedVendor(vendor);
     toggleConfirmBox(true);
-  };
-
-  const deleteProd = async () => {
-    const deleted = await bomServices.deleteBOMList(selectedProduct);
-    console.log(deleted);
-    if (deleted) {
-      toggleConfirmBox(false);
-    }
-  };
-
-  const handleCloseModal = () => {
-    toggleBOMUpload(false);
   };
 
   const sortedProductData = useMemo(() => {
@@ -175,16 +168,35 @@ function ProductPage() {
     return sorted;
   }, [ProductData, sortColumn, sortOrder]);
 
+  const onAddInventory = useCallback((selectedVendor) => {
+    setSelectedVendor(selectedVendor);
+    setShowAddVendorsInventory(true);
+  }, []);
+
+  const handleModalClose = useCallback(() => {
+    setShowAddVendorsInventory(false);
+    setSelectedVendor(null);
+  }, []);
+
+  // to delete vendors
+  const deleteVendors = async () => {
+    const deleted = await vendorsServices.deleteVendors(selectedVendor);
+    console.log(deleted);
+    if (deleted) {
+      toggleConfirmBox(false);
+    }
+  };
+
   return (
     <div className="d-grid gap-2 mt-2 px-2">
       <div className="px-3 py-2 d-flex justify-content-between">
         <h6 style={{ fontSize: "18px" }} className="breadCrumbsHeader boldFont">
-          Products
+          Vendors
         </h6>
         <Breadcrumbs
           options={[
             {
-              name: "Products",
+              name: "Vendors",
               pathName: routes.inventory,
             },
           ]}
@@ -220,27 +232,12 @@ function ProductPage() {
               <div className="d-flex gap-2">
                 <div>
                   <Button
-                    name="Add Product"
+                    name="Add Vendor"
                     onClick={() => {
-                      navigate(routes.addProduct);
+                      onAddInventory(null);
                     }}
                   />
                 </div>
-                {/* <div>
-                  <Button
-                    name="upload BOM"
-                    onClick={() => {
-                      toggleBOMUpload(true);
-                    }}
-                  />
-                </div> */}
-                <ExportTableData
-                  columns={columns}
-                  tableData={sortedProductData}
-                  hiddenColumns={hiddenColumns}
-                  fileName={"Products Details"}
-                  tableHeader={"Products Details"}
-                />
               </div>
             </div>
 
@@ -258,24 +255,29 @@ function ProductPage() {
             />
           </div>
         </Card>
+        {showAddVendorsInventory && (
+          <Modal
+            onClose={handleModalClose}
+            title={selectedVendor ? "Edit Vendor" : "Add Vendor"}
+          >
+            <AddVendors
+              handleModalClose={handleModalClose}
+              selectedVendor={selectedVendor}
+            />
+          </Modal>
+        )}
       </Container>
       <ConfirmBox
         showConfirm={showConfirmBox}
+        onAgree={deleteVendors}
         content="Are you sure want to delete"
         title="Delete"
-        onAgree={deleteProd}
         onCancel={() => {
           toggleConfirmBox(false);
         }}
       />
-
-      {showBOMUpload && (
-        <Modal onClose={handleCloseModal} width={"80%"} title="Upload BOM">
-          <UploadBOM handleCloseModal={handleCloseModal} />
-        </Modal>
-      )}
     </div>
   );
 }
 
-export default ProductPage;
+export default Vendors;

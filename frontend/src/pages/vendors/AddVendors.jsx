@@ -42,18 +42,6 @@ function AddVendors({ handleModalClose, selectedVendor }) {
     address: Joi.string().trim().required().label("Address"),
   });
 
-  // const getData = useCallback(async () => {
-  //   toggleLoading(true);
-  //   const vendorsData = await vendorService.getVendors();
-  //   dispatch(updateVendors(vendorsData));
-  //   toggleLoading(false);
-  // }, [dispatch]);
-
-  // useEffect(() => {
-  //   getData();
-  //   setVendorsInventoryDetails(selectedVendor || defaultValues);
-  // }, [selectedVendor]);
-
   const onVendorsInventoryChange = useCallback(
     ({ target: { name, value } }) => {
       const updated = { ...vendorsInventoryDetails };
@@ -65,7 +53,6 @@ function AddVendors({ handleModalClose, selectedVendor }) {
   );
 
   const doSubmit = useCallback(async () => {
-    // console.log("vendorsListvendorsListvendorsList", vendorsList);
     const validated = validateServices.validateForm(
       vendorsInventoryDetails,
       schema()
@@ -73,18 +60,27 @@ function AddVendors({ handleModalClose, selectedVendor }) {
     if (validated) {
       setErrors(validated);
     } else {
-      if (selectedVendor && selectedVendor) {
-        const updated = await vendorsServices.updateVendors({
-          ...vendorsInventoryDetails,
-          _id: vendorsInventoryDetails._id,
-        });
-        if (updated) {
-          handleModalClose();
-        }
+      let checkMail = vendorsList.filter(
+        (vendor) => vendor.email === vendorsInventoryDetails.email
+      );
+      if (checkMail.length > 0) {
+        setErrors({ email: "EmailId already exists" });
       } else {
-        const added = await vendorsServices.addVendors(vendorsInventoryDetails);
-        if (added) {
-          handleModalClose();
+        if (selectedVendor && selectedVendor) {
+          const updated = await vendorsServices.updateVendors({
+            ...vendorsInventoryDetails,
+            _id: vendorsInventoryDetails._id,
+          });
+          if (updated) {
+            handleModalClose();
+          }
+        } else {
+          const added = await vendorsServices.addVendors(
+            vendorsInventoryDetails
+          );
+          if (added) {
+            handleModalClose();
+          }
         }
       }
     }

@@ -31,6 +31,7 @@ import AddWorkOrder from "./pages/work-order/AddWorkOrder";
 import EditWorkOrder from "./pages/work-order/editWorkOrder";
 import PurchaseWorkOrder from "./pages/work-order/purchaseWorkOrder";
 import EditPurchaseOrder from "./pages/purchase-order/EditPurchaseOrder";
+import Vendors from "./pages/vendors/Vendors";
 import VendorsInventory from "./pages/vendors/VendorsInventory";
 
 function App() {
@@ -86,7 +87,15 @@ function App() {
           }
         />
         <Route
-          path={routes.vendorsInventory}
+          path={routes.vendors}
+          element={
+            <ProtectedRoute>
+              <Vendors />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path={routes.vendorsInventory + "/:id"}
           element={
             <ProtectedRoute>
               <VendorsInventory />

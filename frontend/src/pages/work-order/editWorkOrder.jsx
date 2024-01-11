@@ -3,7 +3,7 @@ import Delete from "@mui/icons-material/Delete";
 import { Card, IconButton } from "@mui/material";
 import { Container } from "@mui/system";
 import Joi from "joi";
-import _ from "lodash";
+import _, { lowerCase } from "lodash";
 import { useDispatch, useSelector } from "react-redux";
 import { useNavigate, useParams } from "react-router-dom";
 import AutoComplete from "../../components/AutoComplete";
@@ -55,6 +55,9 @@ function EditWorkOrder() {
   const [currentPage, setCurrentPage] = useState(0);
   const [rowsPerPage, setRowsPerPage] = useState(10);
   const [showWorkOrder, setShowWorkOrder] = useState(false);
+  const [disabled, setDisabled] = useState(false);
+  const [approveDisabled, setApproveDisabled] = useState(false);
+
   const columns = [
     {
       path: "#",
@@ -88,20 +91,6 @@ function EditWorkOrder() {
       columnStyle: { width: "5%" },
     },
   ];
-
-  const getAvailableQuantity = (partNumber) => {
-    console.log(partNumber);
-
-    const inventoryItem = inventory.find(
-      (item) => item.partNumber === partNumber
-    );
-    console.log(inventoryItem);
-    if (inventoryItem) {
-      return inventoryItem.quantity;
-    }
-
-    return 0;
-  };
 
   const product = useMemo(() => {
     const matchedOrder = workOrders.find((f) => f._id === id);
@@ -188,42 +177,37 @@ function EditWorkOrder() {
   };
 
   const onApproveWorkOrder = async () => {
-    let isInventorySufficient = true;
+    setShowWorkOrder(true);
+    let productPartnumber = workOrderItems.map((items) => items.partNumber);
 
-    workOrderItems.forEach((item) => {
-      const availableQuantity = getAvailableQuantity(item.partNumber);
-      if (availableQuantity < item.quantity) {
-        isInventorySufficient = false;
-      }
-    });
-
-    if (product) {
-      if (isInventorySufficient) {
-        const updatePromises = [];
-        const updatedWorkOrders = {
-          description,
-          items: product.items,
-          _id: product._id,
-        };
-        updatedWorkOrders.status = 1;
-        const workOrderUpdated = await workOrderServices.updateWorkOrder(
-          updatedWorkOrders
-        );
-        updatePromises.push(workOrderUpdated);
-        console.log(workOrderUpdated);
-        if (updatePromises) {
-          navigateToWorkOrder();
-        } else {
-        }
+    let inventoryPartnumber = inventory.filter((element) =>
+      productPartnumber.some((item) => item === element.partNumber)
+    );
+    for (let i = 0; i < workOrderItems.length; i++) {
+      if (inventoryPartnumber[i].quantity < workOrderItems[i].quantity) {
+        setDisabled(false);
       } else {
-        setShowWorkOrder(true);
+        setDisabled(true);
       }
+    }
+    if (areAllElementsGreaterThan(workOrderItems, inventoryPartnumber)) {
+      setApproveDisabled(false);
+    } else {
+      setApproveDisabled(true);
     }
   };
 
-  const navigateToWorkOrder = () => {
-    navigate(routes.workOrders);
-  };
+  function areAllElementsGreaterThan(arr1, arr2) {
+    return arr1.every((value, index) => value.quantity < arr2[index].quantity);
+  }
+
+  let productPartnumber = workOrderItems.map((items) => items.partNumber);
+
+  let inventoryPartnumber = inventory.filter((element) =>
+    productPartnumber.some((item) => item === element.partNumber)
+  );
+
+  console.log(inventoryPartnumber);
 
   const groupedProductData = useMemo(() => {
     let result = [];
@@ -412,6 +396,12 @@ function EditWorkOrder() {
             <ApproveWorkOrder
               handleModalClose={handleModalClose}
               workOrderItems={workOrderItems}
+              data={data}
+              product={product}
+              description={description}
+              setShowWorkOrder={setShowWorkOrder}
+              disabled={disabled}
+              approveDisabled={approveDisabled}
             />
           </Modal>
         )}

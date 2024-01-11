@@ -18,10 +18,12 @@ const AddNewUser = () => {
 
   const { userList, roleData } = useSelector((state) => state);
 
+  let userID = 1000000;
+
   useEffect(() => {
     getData();
     if (!id) {
-      handleGenerate();
+      handleGenerate(userID);
     }
   }, []);
 
@@ -43,7 +45,6 @@ const AddNewUser = () => {
     userId: " ",
   });
 
-  let userID = 100000;
   /*const ipList = [
     { id: 1, name: "All" },
     { id: 2, name: "Selected Ip address" },
@@ -136,15 +137,21 @@ const AddNewUser = () => {
 
   // handleSubmit for Edit
 
-  const handleGenerate = useCallback(() => {
-    let userListLen = userList.length;
-    let useID = Number(userListLen) + Number(userID);
-    let newInputData = { ...selectedUser };
-    newInputData["userId"] = useID;
-
-    setSelectedUser(newInputData);
-  }, [selectedUser]);
-
+  const handleGenerate = useCallback(
+    (num) => {
+      let newInputData = { ...selectedUser };
+      let array = [];
+      let randomId;
+      for (let i = 100000; i < num; i++) {
+        array.push(i);
+        randomId = array[Math.floor(Math.random() * array.length)];
+        newInputData["userId"] = randomId;
+      }
+      setSelectedUser(newInputData);
+    },
+    [selectedUser]
+  );
+  console.log(selectedUser);
   return (
     <>
       <Container maxWidth="xxl m-3">

@@ -15,6 +15,8 @@ import purchaseServices from "../../services/purchaseServices";
 import { routes } from "../../helper/routes";
 import Status from "../work-order/enum";
 import Breadcrumbs from "../../components/Breadcrumbs";
+import ApprovePurchaseOrder from "./ApprovePurchaseOrder";
+import Modal from "../../components/Modal";
 
 const EditPurchaseOrder = () => {
   let { id } = useParams();
@@ -38,6 +40,7 @@ const EditPurchaseOrder = () => {
   const [showConfirm, setShowConfirm] = useState(false);
   const [selectedId, setSelectedId] = useState("");
   const [isLoading, setIsLoading] = useState(false);
+  const [showPurchaseOrder, setShowPurchaseOrder] = useState(false);
 
   const columns = [
     {
@@ -202,23 +205,13 @@ const EditPurchaseOrder = () => {
     onCancel();
   };
 
+  const handleModalClose = useCallback(() => {
+    setShowPurchaseOrder(false);
+  }, []);
+
   // To Approve purchase order
   const approvePurchasedOrder = async () => {
-    setIsLoading(true);
-    if (id) {
-      let targetItem = purchaseInput;
-      targetItem.status = 1;
-
-      let updated = await purchaseServices.updatePurchaseList({
-        ...targetItem,
-        _id: targetItem._id,
-      });
-
-      if (updated) {
-        navigate(routes.purchaseOrders);
-      }
-    }
-    setIsLoading(false);
+    setShowPurchaseOrder(true);
   };
 
   // to save edit changes;
@@ -293,7 +286,7 @@ const EditPurchaseOrder = () => {
                   : false
               }
               isLoading={isLoading}
-              onClick={approvePurchasedOrder}
+              onClick={() => approvePurchasedOrder(null)}
             />
           </div>
         </Card>
@@ -342,6 +335,20 @@ const EditPurchaseOrder = () => {
             setRowsPerPage={setRowsPerPage}
           />
         </Card>
+        {showPurchaseOrder && (
+          <Modal onClose={handleModalClose} title="">
+            <ApprovePurchaseOrder
+              purchasedItems={purchasedItems}
+              purchaseInput={purchaseInput}
+              id={id}
+              // product={product}
+              // description={description}
+              // setShowWorkOrder={setShowWorkOrder}
+              // // disabled={disabled}
+              // approveDisabled={approveDisabled}
+            />
+          </Modal>
+        )}
       </Container>
     </div>
   );

@@ -10,6 +10,7 @@ import { updateInventory } from "../../redux/action/index";
 import ApproveWorkOrder from "./approveWorkOrder";
 import DataTable from "../../components/table/DataTable";
 import { routes } from "../../helper/routes";
+
 function PurchaseOrder({ handleModalClose, productItems }) {
   const { state } = useLocation();
   const { purchaseOrderNumber, data } = state;

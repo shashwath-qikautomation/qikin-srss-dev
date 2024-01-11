@@ -349,7 +349,7 @@ function Inventory() {
       </Container>
       <ConfirmBox
         showConfirm={showConfirmBox}
-        content="Are You Sure Want To Delete"
+        content="Are you sure want to delete"
         title="Delete"
         onAgree={deleteInventory}
         onCancel={() => {

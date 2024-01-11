@@ -10,6 +10,7 @@ import validateServices from "../../services/validateServices";
 import Button from "../../components/Button";
 import Input from "../../components/Input";
 import { routes } from "../../helper/routes";
+import RenderSelect from "../../components/RenderSelect";
 import {
   updateBOMList,
   updateWorkOrder,
@@ -141,28 +142,9 @@ function AddWorkOrder() {
     return result;
   }, [products]);
 
-  const groupedVendorsName = useMemo(() => {
-    let result = [];
-    let seenVendorNames = new Set();
-    let filtered = [vendorsList];
-
-    let flattenedFiltered = filtered.flat();
-
-    flattenedFiltered.forEach((item) => {
-      if (item && item.name) {
-        if (!seenVendorNames.has(item.name)) {
-          result.push(item);
-
-          seenVendorNames.add(item.name);
-        }
-      }
-    });
-
-    return result;
-  }, [vendorsList]);
-
   const schema = () => ({
     productName: Joi.string().trim().required().label("Select Product"),
+    vendor: Joi.string().trim().required().label("Select Vendor"),
     quantity: Joi.number()
       .integer()
       .min(1)
@@ -197,16 +179,16 @@ function AddWorkOrder() {
       quantity: "",
       productName: "",
     });
+    setSelectedVendor(inputData.vendor);
     setSelectedProduct(null);
     setDescription(description);
-    console.log(workOrderItems);
     setWorkOrderItems([...workOrderItems]);
   }, [inputData, workOrderItems]);
 
   const generateWorkOrderNumber = () => {
     return Date.now().toString();
   };
-  console.log(selectedVendor);
+
   const handleChange = ({ target: { value, name } }, option) => {
     const newData = { ...inputData };
     console.log(value);
@@ -226,21 +208,10 @@ function AddWorkOrder() {
     setInputData(newData);
   };
 
-  const handleChangeVendor = ({ target: { value, name } }, option) => {
+  const handleChangeVendor = ({ target: { value, name } }) => {
     const newData = { ...inputData };
-
-    if (name === "vendor") {
-      newData.vendor = option ? option.name : "";
-      //newData.partDescription = option ? option.partDescription : "";
-    } else {
-      newData[name] = value;
-      setErrors("");
-    }
-    if (option || name === "vendor") {
-      setSelectedVendor(option);
-      setErrors("");
-    }
-    if (option) setSelectedVendor(option);
+    newData[name] = value;
+    setErrors("");
     setInputData(newData);
   };
 
@@ -285,7 +256,7 @@ function AddWorkOrder() {
           workOrderNumber:
             inputData.workOrderNumber || generateWorkOrderNumber(),
           description,
-          //vendorId: selectedVendor._id,
+          vendorId: selectedVendor,
           items: consolidatedItems,
         });
         console.log(added);
@@ -304,14 +275,6 @@ function AddWorkOrder() {
     return {
       id: option?._id,
       label: option?.productName || "",
-    };
-  };
-
-  // custom option for vendor
-  const getCustomOptionForVendor = (option) => {
-    return {
-      id: option?._id,
-      label: option?.name || "",
     };
   };
 
@@ -378,7 +341,7 @@ function AddWorkOrder() {
               value={description}
               onChange={(e) => setDescription(e.target.value)}
             />
-            <div className="d-flex align-items-start gap-2 pb-4">
+            <div className="d-flex w-75 align-items-start gap-2 pb-4">
               <AutoComplete
                 options={groupedWorkOrderData}
                 name="productName"
@@ -389,17 +352,16 @@ function AddWorkOrder() {
                 error={errors.productName}
                 required
               />
-              <AutoComplete
-                options={groupedVendorsName}
+              <RenderSelect
+                fullWidth={true}
                 name="vendor"
-                label="Select Vendor"
+                label="Vendor Name"
+                value={inputData?.vendor}
+                options={vendorsList}
                 onChange={handleChangeVendor}
-                value={selectedVendor}
-                getCustomOption={getCustomOptionForVendor}
                 error={errors.vendor}
                 required
               />
-
               <Input
                 style={{ minWidth: 300 }}
                 name="quantity"
