@@ -25,6 +25,7 @@ exports.getAll = (req, res) => {
   try {
     db.workOrder
       .find()
+      .populate("vendorId")
       .then((data) => {
         return res.status(200).json(data);
       })

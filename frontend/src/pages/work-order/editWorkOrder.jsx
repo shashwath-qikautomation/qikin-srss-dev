@@ -24,6 +24,7 @@ import { routes } from "../../helper/routes";
 import validateServices from "../../services/validateServices";
 import workOrderServices from "../../services/workOrderServices";
 import Breadcrumbs from "../../components/Breadcrumbs";
+import VendorModal from "./VenddorModal";
 
 function EditWorkOrder() {
   const { id } = useParams();
@@ -46,8 +47,7 @@ function EditWorkOrder() {
   const [selectedOption, setSelectedOption] = useState(null);
   const [workOrderItems, setWorkOrderItems] = useState([]);
   const [showAllPartNumbers, toggleShowAllPartNumbers] = useState(false);
-  const [selectedInventoryForModal, setSelectedInventoryForModal] =
-    useState(null);
+  const [showVenderField, setShowVenderField] = useState(false);
 
   const [errors, setErrors] = useState("");
   const [sortColumn, setSortColumn] = useState("createdAt");
@@ -57,6 +57,11 @@ function EditWorkOrder() {
   const [showWorkOrder, setShowWorkOrder] = useState(false);
   const [disabled, setDisabled] = useState(false);
   const [approveDisabled, setApproveDisabled] = useState(false);
+  const [vendorsItem, setVendorsItem] = useState([]);
+  const [venderData, setVenderData] = useState({
+    partNumber: "",
+    quantity: "",
+  });
 
   const columns = [
     {
@@ -150,6 +155,10 @@ function EditWorkOrder() {
     setShowWorkOrder(false);
   }, []);
 
+  const vendorModalClose = useCallback(() => {
+    setShowVenderField(false);
+  }, []);
+
   const handleChange = (e, option) => {
     const { value, name } = e.target;
     const newData = { ...data };
@@ -183,13 +192,23 @@ function EditWorkOrder() {
     let inventoryPartnumber = inventory.filter((element) =>
       productPartnumber.some((item) => item === element.partNumber)
     );
+
     for (let i = 0; i < workOrderItems.length; i++) {
-      if (inventoryPartnumber[i].quantity < workOrderItems[i].quantity) {
-        setDisabled(false);
+      const correspondingInventoryItem = inventoryPartnumber.find(
+        (item) => item.partNumber === workOrderItems[i].partNumber
+      );
+
+      if (correspondingInventoryItem) {
+        if (workOrderItems[i].quantity > correspondingInventoryItem.quantity) {
+          setDisabled(false);
+          break;
+        }
       } else {
         setDisabled(true);
+        break;
       }
     }
+
     if (areAllElementsGreaterThan(workOrderItems, inventoryPartnumber)) {
       setApproveDisabled(false);
     } else {
@@ -198,16 +217,8 @@ function EditWorkOrder() {
   };
 
   function areAllElementsGreaterThan(arr1, arr2) {
-    return arr1.every((value, index) => value.quantity < arr2[index].quantity);
+    return arr1.every((value, index) => value.quantity <= arr2[index].quantity);
   }
-
-  let productPartnumber = workOrderItems.map((items) => items.partNumber);
-
-  let inventoryPartnumber = inventory.filter((element) =>
-    productPartnumber.some((item) => item === element.partNumber)
-  );
-
-  console.log(inventoryPartnumber);
 
   const groupedProductData = useMemo(() => {
     let result = [];
@@ -264,6 +275,33 @@ function EditWorkOrder() {
       console.log(workOrderItems);
       setSelectedOption(null);
       setErrors("");
+    }
+  };
+
+  //to add vendor quantity;
+  const handleAddVendor = () => {
+    let newData = [...vendorsItem];
+    let validateForm = validateServices.validateForm(venderData, schema());
+    if (validateForm) {
+      setErrors(validateForm);
+    } else if (venderData.partNumber && venderData.quantity) {
+      let found = newData.find((f) => f.partNumber === data.partNumber);
+
+      if (found) {
+        found.quantity += Number(venderData.quantity);
+      } else {
+        newData.push({
+          partNumber: venderData.partNumber,
+          quantity: Number(venderData.quantity),
+        });
+      }
+
+      setVendorsItem(newData);
+      setVenderData({ ...venderData, quantity: "", partNumber: "" });
+      console.log(vendorsItem);
+      setSelectedOption(null);
+      setErrors("");
+      setShowVenderField(false);
     }
   };
 
@@ -402,6 +440,19 @@ function EditWorkOrder() {
               setShowWorkOrder={setShowWorkOrder}
               disabled={disabled}
               approveDisabled={approveDisabled}
+              setShowVenderField={setShowVenderField}
+              vendorsItem={vendorsItem}
+            />
+          </Modal>
+        )}
+        {showVenderField && (
+          <Modal onClose={vendorModalClose} title="Add Vendor Quantity">
+            <VendorModal
+              groupedProductData={groupedProductData}
+              getCustomOption={getCustomOption}
+              venderData={venderData}
+              setVenderData={setVenderData}
+              handleAddVendor={handleAddVendor}
             />
           </Modal>
         )}

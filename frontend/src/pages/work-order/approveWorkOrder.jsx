@@ -10,6 +10,10 @@ import { updateInventory } from "../../redux/action/index";
 import DataTable from "../../components/table/DataTable";
 import { routes } from "../../helper/routes";
 import workOrderServices from "../../services/workOrderServices";
+import Delete from "@mui/icons-material/Delete";
+import { IconButton } from "@mui/material";
+import { Container } from "@mui/system";
+
 function ApproveWorkOrder({
   handleModalClose,
   workOrderItems,
@@ -19,18 +23,16 @@ function ApproveWorkOrder({
   setShowWorkOrder,
   disabled,
   approveDisabled,
+  setShowVenderField,
+  vendorsItem,
 }) {
-  console.log(workOrderItems);
-
   const dispatch = useDispatch();
   const { inventory } = useSelector((state) => state);
-  console.log(inventory);
   const navigate = useNavigate();
   const [sortColumn, setSortColumn] = useState("createdAt");
   const [sortOrder, setSortOrder] = useState("desc");
   const [currentPage, setCurrentPage] = useState(0);
   const [rowsPerPage, setRowsPerPage] = useState(10);
-  const [inventoryDetails, setInventoryDetails] = useState();
   const [errors, setErrors] = useState({});
   const [isLoading, toggleLoading] = useState(false);
 
@@ -78,6 +80,40 @@ function ApproveWorkOrder({
           </div>
         );
       }),
+    },
+  ];
+
+  const vendorColumns = [
+    {
+      path: "#",
+      label: "#",
+      content: (item, index) => (
+        <span>{currentPage * rowsPerPage + index + 1}</span>
+      ),
+      columnStyle: { width: "3%" },
+    },
+
+    {
+      path: "partNumber",
+      label: "Part Number",
+      content: (item) => {
+        return <div>{item.partNumber}</div>;
+      },
+    },
+    { path: "vendorsQuantity", label: "Vendors Quantity" },
+    {
+      path: "delete",
+      label: "Actions",
+      content: (item) => (
+        <IconButton
+        // onClick={() => {
+        //   onItemDelete(item);
+        // }}
+        >
+          <Delete color="error" />
+        </IconButton>
+      ),
+      columnStyle: { width: "5%" },
     },
   ];
 
@@ -172,72 +208,91 @@ function ApproveWorkOrder({
   };
 
   const onApprove = async () => {
-    let isInventorySufficient = true;
+    setShowVenderField(true);
+    // let isInventorySufficient = true;
 
-    workOrderItems.forEach((item) => {
-      const availableQuantity = getAvailableQuantity(item.partNumber);
-      if (availableQuantity < item.quantity) {
-        isInventorySufficient = false;
-      }
-    });
+    // workOrderItems.forEach((item) => {
+    //   const availableQuantity = getAvailableQuantity(item.partNumber);
+    //   if (availableQuantity < item.quantity) {
+    //     isInventorySufficient = false;
+    //   }
+    // });
 
-    if (product) {
-      if (isInventorySufficient) {
-        const updatePromises = [];
-        const updatedWorkOrders = {
-          description,
-          items: product.items,
-          _id: product._id,
-        };
-        updatedWorkOrders.status = 1;
-        const workOrderUpdated = await workOrderServices.updateWorkOrder(
-          updatedWorkOrders
-        );
-        updatePromises.push(workOrderUpdated);
-        console.log(workOrderUpdated);
-        if (updatePromises) {
-          navigateToWorkOrder();
-        } else {
-        }
-      } else {
-        setShowWorkOrder(true);
-      }
-    }
+    // if (product) {
+    //   if (isInventorySufficient) {
+    //     const updatePromises = [];
+    //     const updatedWorkOrders = {
+    //       description,
+    //       items: product.items,
+    //       _id: product._id,
+    //     };
+    //     updatedWorkOrders.status = 1;
+    //     const workOrderUpdated = await workOrderServices.updateWorkOrder(
+    //       updatedWorkOrders
+    //     );
+    //     updatePromises.push(workOrderUpdated);
+    //     console.log(workOrderUpdated);
+    //     if (updatePromises) {
+    //       navigateToWorkOrder();
+    //     } else {
+    //     }
+    //   } else {
+    //     setShowWorkOrder(true);
+    //   }
+    // }
   };
 
   return (
-    <div className="d-grid gap-2 p-2">
-      <div className="d-flex gap-2 justify-content-end">
-        <Button
-          name="Approve"
-          disabled={
-            data.status === 1 || workOrderItems.length === 0 || approveDisabled
-              ? true
-              : false
-          }
-          onClick={onApprove}
-        />
-        <Button
-          name={"Purchase Order"}
-          disabled={disabled}
-          onClick={handlePurchaseOrderClick}
-        />
-      </div>
+    <Container maxWidth="lg">
       <div className="d-grid gap-2 p-2">
-        <DataTable
-          rows={productData}
-          columns={columns}
-          sortColumn={sortColumn}
-          sortOrder={sortOrder}
-          currentPage={currentPage}
-          rowsPerPage={rowsPerPage}
-          setSortColumn={setSortColumn}
-          setSortOrder={setSortOrder}
-          setCurrentPage={setCurrentPage}
-          setRowsPerPage={setRowsPerPage}
-        />
+        <div className="d-flex gap-2 justify-content-end">
+          <Button
+            name="Approve"
+            disabled={
+              data.status === 1 ||
+              workOrderItems.length === 0 ||
+              approveDisabled
+                ? true
+                : false
+            }
+            onClick={onApprove}
+          />
+          <Button
+            name={"Purchase Order"}
+            disabled={disabled}
+            onClick={handlePurchaseOrderClick}
+          />
+        </div>
+        <div className="d-grid w-100 gap-2 p-2">
+          <DataTable
+            rows={vendorsItem}
+            columns={vendorColumns}
+            sortColumn={sortColumn}
+            sortOrder={sortOrder}
+            currentPage={currentPage}
+            rowsPerPage={rowsPerPage}
+            setSortColumn={setSortColumn}
+            setSortOrder={setSortOrder}
+            setCurrentPage={setCurrentPage}
+            setRowsPerPage={setRowsPerPage}
+          />
+        </div>
+        <div className="d-grid gap-2 p-2">
+          <DataTable
+            rows={productData}
+            columns={columns}
+            sortColumn={sortColumn}
+            sortOrder={sortOrder}
+            currentPage={currentPage}
+            rowsPerPage={rowsPerPage}
+            setSortColumn={setSortColumn}
+            setSortOrder={setSortOrder}
+            setCurrentPage={setCurrentPage}
+            setRowsPerPage={setRowsPerPage}
+          />
+        </div>
       </div>
-    </div>
+    </Container>
   );
 }
 

@@ -1,190 +1,120 @@
-import React, { useCallback, useEffect, useMemo, useState } from "react";
-import CloseIcon from "@mui/icons-material/Close";
-import Delete from "@mui/icons-material/Delete";
-import Edit from "@mui/icons-material/Edit";
-import { Card, IconButton, InputAdornment } from "@mui/material";
-import { Container } from "@mui/system";
-
-import { useDispatch, useSelector } from "react-redux";
-import { useNavigate } from "react-router-dom";
-import Button from "../../components/Button";
-import ConfirmBox from "../../components/ConfirmBox";
-import DataTable from "../../components/table/DataTable";
-import Input from "../../components/Input";
-import Modal from "../../components/Modal";
+import React, { useCallback, useState } from "react";
 import { routes } from "../../helper/routes";
-import _ from "lodash";
-import moment from "moment";
 import Breadcrumbs from "../../components/Breadcrumbs";
-import AddVendors from "./AddVendors";
-import { updateVendors } from "../../redux/action";
-import vendorsServices from "../../services/vendorsInventoryServices";
+import { Card, Container, InputAdornment, IconButton } from "@mui/material";
+import Input from "../../components/Input";
+import Delete from "@mui/icons-material/Delete";
+import CheckIcon from "@mui/icons-material/Check";
+import CloseIcon from "@mui/icons-material/Close";
+import EditIcon from "@mui/icons-material/Edit";
+import DataTable from "../../components/table/DataTable";
+import Button from "../../components/Button";
+import Modal from "../../components/Modal";
 
-function VendorsInventory() {
-  const [selectedVendor, setSelectedVendor] = useState(null);
-  const [isPageLoading, togglePageLoading] = useState(false);
-  const [showConfirmBox, toggleConfirmBox] = useState(false);
-  const { vendorsList } = useSelector((state) => state);
-
-  const [search, setSearch] = useState("");
-  const dispatch = useDispatch();
-  const navigate = useNavigate();
-  const [ProductData, setProductData] = useState([]);
+const VendorsInventory = () => {
   const [sortColumn, setSortColumn] = useState("createdAt");
   const [sortOrder, setSortOrder] = useState("desc");
   const [currentPage, setCurrentPage] = useState(0);
   const [rowsPerPage, setRowsPerPage] = useState(10);
-  const [hiddenColumns, setHiddenColumns] = useState({});
-  const [showAddVendorsInventory, setShowAddVendorsInventory] = useState(false);
+  const [search, setSearch] = useState("");
+  const [showDescription, setShowDescription] = useState(false);
+  const [index, setIndex] = useState();
+  const [showModal, setShowModal] = useState(false);
 
   const columns = [
     {
       path: "#",
       label: "#",
-      content: (item, index) => (
-        <span>{currentPage * rowsPerPage + index + 1}</span>
+      content: useCallback(
+        (wo, index) => <span>{currentPage * rowsPerPage + index + 1}</span>,
+        [currentPage, rowsPerPage]
       ),
-      columnStyle: { width: "3%" },
     },
     {
-      path: "name",
-      label: "Name",
+      path: "part",
+      label: "Part",
       sortable: true,
-      content: (vendor) => {
+    },
+    {
+      path: "partName",
+      label: "Part Number",
+      content: useCallback((vendorInventory, i) => {
         return (
           <div>
-            <p>{vendor.name || "-"}</p>
+            {" "}
+            <p>{vendorInventory.partNumber || "-"}</p>
           </div>
         );
-      },
-    },
-    {
-      path: "email",
-      label: "Email",
-      content: useCallback((vendor) => {
-        return <div>{vendor?.email}</div>;
-      }, []),
+      }),
       sortable: true,
     },
+
     {
-      path: "phoneNumber",
-      label: "Phone Number",
-      content: useCallback((vendor) => {
-        return <div>{vendor?.phoneNumber}</div>;
-      }, []),
-      sortable: true,
-    },
-    {
-      path: "address",
-      label: "Address",
-      content: useCallback((vendor) => {
-        return <div>{vendor?.address}</div>;
-      }, []),
-      sortable: true,
-    },
-    {
-      path: "createdAt",
-      label: "Created At",
-      sortable: true,
-      content: (product) => {
+      path: "partDescription",
+      label: "Part Description",
+      content: useCallback((vendorInventory, i) => {
         return (
           <div>
-            {moment(product.createdAt).format("DD/MM/YYYY") +
-              moment(product.createdAt).format(" hh:mm a ")}
+            {" "}
+            <p>{vendorInventory.partDescription || "-"}</p>
           </div>
         );
-      },
+      }),
+      sortable: true,
     },
     {
-      path: "edit",
+      path: "manufacture",
+      label: "Manufacture",
+      content: useCallback((vendorInventory, i) => {
+        return (
+          <div>
+            {" "}
+            <p>{vendorInventory.manufacture || "-"}</p>
+          </div>
+        );
+      }),
+      sortable: true,
+    },
+    {
+      path: "vendorQuantity",
+      label: "Vendor Quantity",
+      content: useCallback((vendorInventory) => {
+        return <div>{vendorInventory?.quantity}</div>;
+      }, []),
+      sortable: true,
+    },
+    {
+      path: "Edit",
       label: "Actions",
       nonExportable: true,
-      content: (vendor) => (
-        <div className="d-flex">
-          <IconButton onClick={() => onAddInventory(vendor)}>
-            <Edit color="primary" />
-          </IconButton>
-          <IconButton onClick={() => confirmDelete(vendor._id)}>
-            <Delete color="error" />
-          </IconButton>
-        </div>
-      ),
-
       columnStyle: { width: "5%" },
+      content: (e, i) => {
+        return (
+          <div className="d-flex align-items-center">
+            {!(showDescription && index === i) ? (
+              <EditIcon color="primary">
+                <IconButton />
+              </EditIcon>
+            ) : (
+              <>
+                <div className="d-flex gap-3">
+                  <CheckIcon color="success" />
+                  <CloseIcon color="error" />
+                </div>
+              </>
+            )}
+            <IconButton>
+              <Delete color="error" />
+            </IconButton>
+          </div>
+        );
+      },
     },
   ];
 
-  const getData = useCallback(async () => {
-    togglePageLoading(true);
-    const vendorPayload = await vendorsServices.getVendors();
-    dispatch(updateVendors(vendorPayload));
-    togglePageLoading(false);
-  }, [dispatch]);
-
-  useEffect(() => {
-    getData();
+  const onAddVendorInventory = useCallback((selectedInventory) => {
+    setShowModal(true);
   }, []);
-
-  const dataTableSearch = (dataToFilter) => {
-    let filtered = dataToFilter.filter(
-      (f) =>
-        f?.description
-          ?.toString()
-          .toLowerCase()
-          .includes(search.trim().toLowerCase()) ||
-        f?.productName
-          ?.toString()
-          .toLowerCase()
-          .includes(search.trim().toLowerCase())
-    );
-    return filtered;
-  };
-
-  useMemo(() => {
-    let filtered = vendorsList;
-
-    if (search) {
-      filtered = dataTableSearch(filtered);
-    }
-    setProductData(filtered);
-  }, [vendorsList, search]);
-
-  const confirmDelete = (vendor) => {
-    console.log(vendor);
-    setSelectedVendor(vendor);
-    toggleConfirmBox(true);
-  };
-
-  const sortedProductData = useMemo(() => {
-    let sorted = [];
-    if (sortColumn === "productName") {
-      sorted = _.orderBy(ProductData, ["productName"], [sortOrder]);
-    } else if (sortColumn === "description") {
-      sorted = _.orderBy(ProductData, ["description"], [sortOrder]);
-    } else {
-      sorted = _.orderBy(ProductData, [sortColumn], [sortOrder]);
-    }
-    return sorted;
-  }, [ProductData, sortColumn, sortOrder]);
-
-  const onAddInventory = useCallback((selectedVendor) => {
-    setSelectedVendor(selectedVendor);
-    setShowAddVendorsInventory(true);
-  }, []);
-
-  const handleModalClose = useCallback(() => {
-    setShowAddVendorsInventory(false);
-    setSelectedVendor(null);
-  }, []);
-
-  // to delete vendors
-  const deleteVendors = async () => {
-    const deleted = await vendorsServices.deleteVendors(selectedVendor);
-    console.log(deleted);
-    if (deleted) {
-      toggleConfirmBox(false);
-    }
-  };
 
   return (
     <div className="d-grid gap-2 mt-2 px-2">
@@ -202,47 +132,41 @@ function VendorsInventory() {
           activePath={routes.inventory}
         />
       </div>
-
       <Container maxWidth="xxl">
         <Card className="shadow-sm p-3 ">
-          <div className="d-grid gap-3">
-            <div className="d-flex flex-wrap justify-content-between gap-2">
-              <div>
-                <Input
-                  label="search"
-                  name="Search"
-                  value={search}
-                  onChange={async (e) => {
-                    setSearch(e.target.value);
-                  }}
-                  InputProps={{
-                    endAdornment: (
-                      <InputAdornment
-                        type="hidden"
-                        position="end"
-                        style={{ cursor: "pointer" }}
-                      >
-                        {search && <CloseIcon onClick={() => setSearch("")} />}
-                      </InputAdornment>
-                    ),
-                  }}
+          <div className="d-flex flex-wrap justify-content-between gap-2">
+            <div>
+              <Input
+                label="search"
+                name="Search"
+                //   value={search}
+                //   onChange={async (e) => {
+                //     setSearch(e.target.value);
+                //   }}
+                InputProps={{
+                  endAdornment: (
+                    <InputAdornment
+                      type="hidden"
+                      position="end"
+                      style={{ cursor: "pointer" }}
+                    >
+                      {/* {search && <CloseIcon onClick={() => setSearch("")} />} */}
+                    </InputAdornment>
+                  ),
+                }}
+              />
+            </div>
+            <div className="d-flex justify-content-end">
+              <div className="px-2">
+                <Button
+                  name={"Add Component"}
+                  onClick={() => onAddVendorInventory(null)}
                 />
               </div>
-              <div className="d-flex gap-2">
-                <div>
-                  <Button
-                    name="Add Vendor"
-                    onClick={() => {
-                      onAddInventory(null);
-                    }}
-                  />
-                </div>
-              </div>
             </div>
-
             <DataTable
+              //rows={sortedInventoryList}
               columns={columns}
-              rows={sortedProductData}
               sortColumn={sortColumn}
               sortOrder={sortOrder}
               currentPage={currentPage}
@@ -254,29 +178,20 @@ function VendorsInventory() {
             />
           </div>
         </Card>
-        {showAddVendorsInventory && (
-          <Modal
-            onClose={handleModalClose}
-            title={selectedVendor ? "Edit Vendor" : "Add Vendor"}
-          >
-            <AddVendors
-              handleModalClose={handleModalClose}
-              selectedVendor={selectedVendor}
-            />
-          </Modal>
-        )}
       </Container>
-      <ConfirmBox
-        showConfirm={showConfirmBox}
-        onAgree={deleteVendors}
-        content="Are You Sure Want To Delete"
-        title="Delete"
-        onCancel={() => {
-          toggleConfirmBox(false);
-        }}
-      />
+      {showModal && (
+        <Modal
+        // onClose={handleModalClose}
+        // title={selectedInventory ? "Edit Component" : "Add Component"}
+        >
+          {/* <AddInventory
+          //handleModalClose={handleModalClose}
+          //selectedInventory={selectedInventory}
+          /> */}
+        </Modal>
+      )}
     </div>
   );
-}
+};
 
 export default VendorsInventory;
