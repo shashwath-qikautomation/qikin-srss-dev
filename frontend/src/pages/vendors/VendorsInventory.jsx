@@ -1,4 +1,4 @@
-import React, { useCallback, useState } from "react";
+import React, { useCallback, useState, useMemo, useEffect } from "react";
 import { routes } from "../../helper/routes";
 import Breadcrumbs from "../../components/Breadcrumbs";
 import { Card, Container, InputAdornment, IconButton } from "@mui/material";
@@ -8,10 +8,14 @@ import CheckIcon from "@mui/icons-material/Check";
 import CloseIcon from "@mui/icons-material/Close";
 import EditIcon from "@mui/icons-material/Edit";
 import DataTable from "../../components/table/DataTable";
-import Button from "../../components/Button";
-import Modal from "../../components/Modal";
+import { useParams } from "react-router-dom";
+import { useDispatch, useSelector } from "react-redux";
+import { updateVendorsInventory } from "../../redux/action/index";
+import vendorsServices from "../../services/vendorsInventoryServices";
+import VendorData from "./VenderData";
 
 const VendorsInventory = () => {
+  const { id } = useParams();
   const [sortColumn, setSortColumn] = useState("createdAt");
   const [sortOrder, setSortOrder] = useState("desc");
   const [currentPage, setCurrentPage] = useState(0);
@@ -19,7 +23,10 @@ const VendorsInventory = () => {
   const [search, setSearch] = useState("");
   const [showDescription, setShowDescription] = useState(false);
   const [index, setIndex] = useState();
-  const [showModal, setShowModal] = useState(false);
+  const [vendorInventoryItems, setVendorInventoryItems] = useState([]);
+
+  const { vendorsInventory } = useSelector((state) => state);
+  const dispatch = useDispatch();
 
   const columns = [
     {
@@ -29,11 +36,6 @@ const VendorsInventory = () => {
         (wo, index) => <span>{currentPage * rowsPerPage + index + 1}</span>,
         [currentPage, rowsPerPage]
       ),
-    },
-    {
-      path: "part",
-      label: "Part",
-      sortable: true,
     },
     {
       path: "partName",
@@ -48,73 +50,46 @@ const VendorsInventory = () => {
       }),
       sortable: true,
     },
-
     {
-      path: "partDescription",
-      label: "Part Description",
-      content: useCallback((vendorInventory, i) => {
-        return (
-          <div>
-            {" "}
-            <p>{vendorInventory.partDescription || "-"}</p>
-          </div>
-        );
-      }),
-      sortable: true,
-    },
-    {
-      path: "manufacture",
-      label: "Manufacture",
-      content: useCallback((vendorInventory, i) => {
-        return (
-          <div>
-            {" "}
-            <p>{vendorInventory.manufacture || "-"}</p>
-          </div>
-        );
-      }),
-      sortable: true,
-    },
-    {
-      path: "vendorQuantity",
-      label: "Vendor Quantity",
+      path: "requiredQuantity",
+      label: "Required Quantity",
       content: useCallback((vendorInventory) => {
         return <div>{vendorInventory?.quantity}</div>;
       }, []),
       sortable: true,
     },
-    {
-      path: "Edit",
-      label: "Actions",
-      nonExportable: true,
-      columnStyle: { width: "5%" },
-      content: (e, i) => {
-        return (
-          <div className="d-flex align-items-center">
-            {!(showDescription && index === i) ? (
-              <EditIcon color="primary">
-                <IconButton />
-              </EditIcon>
-            ) : (
-              <>
-                <div className="d-flex gap-3">
-                  <CheckIcon color="success" />
-                  <CloseIcon color="error" />
-                </div>
-              </>
-            )}
-            <IconButton>
-              <Delete color="error" />
-            </IconButton>
-          </div>
-        );
-      },
-    },
   ];
 
-  const onAddVendorInventory = useCallback((selectedInventory) => {
-    setShowModal(true);
-  }, []);
+  console.log(vendorsInventory);
+
+  const getData = useCallback(async () => {
+    const [vendorInventoryData] = await Promise.all([
+      vendorsServices.getVendorInventory(),
+    ]);
+
+    dispatch(updateVendorsInventory(vendorInventoryData));
+  }, [dispatch]);
+
+  useEffect(() => {
+    getData();
+  }, [id]);
+
+  const vendorDetails = useMemo(() => {
+    const matchedDetail = vendorsInventory.find((f) => f.vendorId._id === id);
+
+    console.log(matchedDetail);
+    if (matchedDetail) {
+      let newVendorList = matchedDetail.requiredQuantity.map((m) => ({
+        partNumber: m.partNumber,
+        quantity: m.quantity,
+      }));
+      setVendorInventoryItems(newVendorList);
+      // setFilteredWorkOrder(newVendorList);
+    } else {
+      console.error("No matched order found for ID:", id);
+    }
+    return matchedDetail;
+  }, [id, vendorsInventory]);
 
   return (
     <div className="d-grid gap-2 mt-2 px-2">
@@ -132,6 +107,7 @@ const VendorsInventory = () => {
           activePath={routes.inventory}
         />
       </div>
+      <VendorData vendorsInventory={vendorsInventory} id={id} />
       <Container maxWidth="xxl">
         <Card className="shadow-sm p-3 ">
           <div className="d-flex flex-wrap justify-content-between gap-2">
@@ -156,16 +132,8 @@ const VendorsInventory = () => {
                 }}
               />
             </div>
-            <div className="d-flex justify-content-end">
-              <div className="px-2">
-                <Button
-                  name={"Add Component"}
-                  onClick={() => onAddVendorInventory(null)}
-                />
-              </div>
-            </div>
             <DataTable
-              //rows={sortedInventoryList}
+              rows={vendorInventoryItems}
               columns={columns}
               sortColumn={sortColumn}
               sortOrder={sortOrder}
@@ -179,17 +147,6 @@ const VendorsInventory = () => {
           </div>
         </Card>
       </Container>
-      {showModal && (
-        <Modal
-        // onClose={handleModalClose}
-        // title={selectedInventory ? "Edit Component" : "Add Component"}
-        >
-          {/* <AddInventory
-          //handleModalClose={handleModalClose}
-          //selectedInventory={selectedInventory}
-          /> */}
-        </Modal>
-      )}
     </div>
   );
 };

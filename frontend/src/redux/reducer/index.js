@@ -9,6 +9,7 @@ import {
   SETTINGS,
   PURCHASE_LIST,
   VENDORS_LIST,
+  VENDORS_INVENTORY,
 } from "../action";
 
 const initialState = {
@@ -38,6 +39,7 @@ const initialState = {
   ],
   purchaseList: [],
   vendorsList: [],
+  vendorsInventory: [],
   settings: {},
 };
 
@@ -63,6 +65,8 @@ const reducer = (state = initialState, action) => {
       return { ...state, purchaseList: action.payload };
     case VENDORS_LIST:
       return { ...state, vendorsList: action.payload };
+    case VENDORS_INVENTORY:
+      return { ...state, vendorsInventory: action.payload };
     default:
       return state;
   }

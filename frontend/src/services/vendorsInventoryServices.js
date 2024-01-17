@@ -1,6 +1,7 @@
 import http from "./httpServices";
 import apiEndPoints from "./apiEndPoints";
 
+// Vendor Services
 const getVendors = async () => {
   try {
     const { data } = await http.get(
@@ -54,11 +55,44 @@ const deleteVendors = async (deleteVendors) => {
   }
 };
 
+// Vendor Inventory Services
+
+const getVendorInventory = async () => {
+  try {
+    const { data } = await http.get(
+      apiEndPoints.serverPath + apiEndPoints.vendorEntity
+    );
+    return data;
+  } catch (error) {
+    console.log(error);
+    return [];
+  }
+};
+
+//Add Vendors
+const addVendorInventory = async (vendorData) => {
+  console.log(vendorData);
+  try {
+    const { data } = await http.post(
+      apiEndPoints.serverPath + apiEndPoints.vendorEntity,
+      vendorData
+    );
+    console.log(data);
+    return data;
+  } catch (error) {
+    console.log(error);
+  }
+};
+
 const vendorsServices = {
   getVendors,
   addVendors,
   updateVendors,
   deleteVendors,
+
+  //Vendor Inventory
+  getVendorInventory,
+  addVendorInventory,
 };
 
 export default vendorsServices;

@@ -50,12 +50,12 @@ function EditWorkOrder() {
   const [showVenderField, setShowVenderField] = useState(false);
 
   const [errors, setErrors] = useState("");
+  const [vendorErrors, setVendorErrors] = useState("");
   const [sortColumn, setSortColumn] = useState("createdAt");
   const [sortOrder, setSortOrder] = useState("desc");
   const [currentPage, setCurrentPage] = useState(0);
   const [rowsPerPage, setRowsPerPage] = useState(10);
   const [showWorkOrder, setShowWorkOrder] = useState(false);
-  const [disabled, setDisabled] = useState(false);
   const [approveDisabled, setApproveDisabled] = useState(false);
   const [vendorsItem, setVendorsItem] = useState([]);
   const [venderData, setVenderData] = useState({
@@ -99,7 +99,6 @@ function EditWorkOrder() {
 
   const product = useMemo(() => {
     const matchedOrder = workOrders.find((f) => f._id === id);
-    console.log(matchedOrder);
     if (matchedOrder) {
       setData({
         ...matchedOrder,
@@ -122,13 +121,16 @@ function EditWorkOrder() {
     quantity: Joi.number().integer().min(1).required().label("Quantity"),
   });
 
+  const vendorSchema = () => ({
+    partNumber: Joi.string().required().label("Part Number"),
+    quantity: Joi.number().integer().min(1).required().label("Quantity"),
+  });
+
   const onItemDelete = (item) => {
     let newProductItems = [...workOrderItems];
-    console.log(newProductItems);
     newProductItems = newProductItems.filter(
       (f) => f.partNumber !== item.partNumber
     );
-    console.log(newProductItems);
     setWorkOrderItems(newProductItems);
   };
 
@@ -193,22 +195,6 @@ function EditWorkOrder() {
       productPartnumber.some((item) => item === element.partNumber)
     );
 
-    for (let i = 0; i < workOrderItems.length; i++) {
-      const correspondingInventoryItem = inventoryPartnumber.find(
-        (item) => item.partNumber === workOrderItems[i].partNumber
-      );
-
-      if (correspondingInventoryItem) {
-        if (workOrderItems[i].quantity > correspondingInventoryItem.quantity) {
-          setDisabled(false);
-          break;
-        }
-      } else {
-        setDisabled(true);
-        break;
-      }
-    }
-
     if (areAllElementsGreaterThan(workOrderItems, inventoryPartnumber)) {
       setApproveDisabled(false);
     } else {
@@ -272,7 +258,6 @@ function EditWorkOrder() {
       setWorkOrderItems(newData);
       setData({ ...data, quantity: "", partNumber: "", status: data.status });
       setDescription(description);
-      console.log(workOrderItems);
       setSelectedOption(null);
       setErrors("");
     }
@@ -281,27 +266,39 @@ function EditWorkOrder() {
   //to add vendor quantity;
   const handleAddVendor = () => {
     let newData = [...vendorsItem];
-    let validateForm = validateServices.validateForm(venderData, schema());
+    let validateForm = validateServices.validateForm(
+      venderData,
+      vendorSchema()
+    );
     if (validateForm) {
-      setErrors(validateForm);
+      setVendorErrors(validateForm);
     } else if (venderData.partNumber && venderData.quantity) {
-      let found = newData.find((f) => f.partNumber === data.partNumber);
+      let found = newData.find((f) => f.partNumber === venderData.partNumber);
 
       if (found) {
         found.quantity += Number(venderData.quantity);
       } else {
+        //to match inventory partNumber;
+        const partNumber = venderData.partNumber;
+        const inventoryData = inventory.find(
+          (match) => match.partNumber === partNumber
+        );
+
+        console.log(inventoryData);
         newData.push({
+          part: inventoryData.part,
           partNumber: venderData.partNumber,
           quantity: Number(venderData.quantity),
+          manufacture: inventoryData.manufacture,
         });
       }
 
       setVendorsItem(newData);
       setVenderData({ ...venderData, quantity: "", partNumber: "" });
-      console.log(vendorsItem);
       setSelectedOption(null);
       setErrors("");
       setShowVenderField(false);
+      setApproveDisabled();
     }
   };
 
@@ -438,21 +435,24 @@ function EditWorkOrder() {
               product={product}
               description={description}
               setShowWorkOrder={setShowWorkOrder}
-              disabled={disabled}
               approveDisabled={approveDisabled}
               setShowVenderField={setShowVenderField}
+              showWorkOrder={showWorkOrder}
               vendorsItem={vendorsItem}
+              setVendorsItem={setVendorsItem}
             />
           </Modal>
         )}
         {showVenderField && (
           <Modal onClose={vendorModalClose} title="Add Vendor Quantity">
             <VendorModal
-              groupedProductData={groupedProductData}
+              workOrderItems={workOrderItems}
               getCustomOption={getCustomOption}
               venderData={venderData}
               setVenderData={setVenderData}
               handleAddVendor={handleAddVendor}
+              vendorErrors={vendorErrors}
+              setVendorErrors={setVendorErrors}
             />
           </Modal>
         )}

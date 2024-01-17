@@ -181,7 +181,6 @@ function Vendors() {
   // to delete vendors
   const deleteVendors = async () => {
     const deleted = await vendorsServices.deleteVendors(selectedVendor);
-    console.log(deleted);
     if (deleted) {
       toggleConfirmBox(false);
     }

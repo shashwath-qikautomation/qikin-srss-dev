@@ -70,20 +70,32 @@ exports.updateVendor = async (req, res, io) => {
 // delete the vendor
 exports.deleteVendor = async (req, res) => {
   try {
-    db.vendor
-      .findByIdAndRemove(req.params.id)
-      .then((data) => {
-        vendorSocketIo(req.params.id, 3);
-        return res
-          .status(200)
-          .send({ message: "Vendor was deleted successfully" });
-      })
-      .catch((err) => {
-        return res.status(500).send({
-          message: "There was an error while deleting data.",
-        });
-      });
+    const vendorData = await db.vendor.findById(req.params.id);
+
+    if (!vendorData) {
+      return res.status(404).send({ message: "Vendor not found" });
+    }
+
+    await db.vendor.findByIdAndRemove(req.params.id);
+    vendorSocketIo(req.params.id, 3);
+
+    // Delete vendorEntity
+    const vendorEntityData = await db.vendorEntity.findOneAndRemove({
+      vendorId: req.params.id,
+    });
+
+    // if (!vendorEntityData) {
+    //   // If vendorEntity not found, still proceed and emit socket event
+    //   workOrderSocketIo(req.params.id, 3);
+    // } else {
+    //   workOrderSocketIo(vendorEntityData._id, 3);
+    // }
+
+    return res
+      .status(200)
+      .send({ message: "Vendor and VendorEntity were deleted successfully" });
   } catch (error) {
-    res.status(500).send(error.message);
+    console.error(error);
+    res.status(500).send({ message: "Internal Server Error" });
   }
 };

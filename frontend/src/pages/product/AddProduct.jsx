@@ -252,6 +252,8 @@ function AddProduct() {
     setShowBatchItems(false);
   };
 
+  console.log(data);
+
   return (
     <div className="d-grid gap-2 mt-2">
       <div className="px-3 py-2 d-flex justify-content-between">

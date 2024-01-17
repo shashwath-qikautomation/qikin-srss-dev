@@ -56,6 +56,14 @@ function Inventory() {
       path: "part",
       label: "Part",
       sortable: true,
+      content: useCallback((inventory, i) => {
+        return (
+          <div>
+            {" "}
+            <p>{inventory.part || "-"}</p>
+          </div>
+        );
+      }),
     },
     {
       path: "partName",

@@ -102,6 +102,7 @@ require("./app/routes/workOrder.route")(app);
 require("./app/routes/role.route")(app);
 require("./app/routes/purchase.routes")(app);
 require("./app/routes/vendors.routes")(app);
+require("./app/routes/vendorEntity.route")(app);
 
 const PORT = 8081;
 

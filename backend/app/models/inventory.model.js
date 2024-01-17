@@ -1,6 +1,10 @@
 module.exports = (mongoose) => {
   let schema = mongoose.Schema(
     {
+      part: {
+        type: Number,
+        require: [true, "part is required"],
+      },
       partNumber: {
         type: String,
         require: [true, "partName is required"],

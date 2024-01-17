@@ -1,18 +1,20 @@
-import React, { useState } from "react";
+import React, { useState, useMemo } from "react";
 import AutoComplete from "../../components/AutoComplete";
 import Input from "../../components/Input";
 import Button from "../../components/Button";
 import { Card } from "@mui/material";
 import { Container } from "@mui/system";
+import _ from "lodash";
 
 const VendorModal = ({
-  groupedProductData,
   getCustomOption,
   venderData,
   setVenderData,
   handleAddVendor,
+  workOrderItems,
+  vendorErrors,
+  setVendorErrors,
 }) => {
-  const [errors, setErrors] = useState("");
   const [selectedOption, setSelectedOption] = useState(null);
 
   const handleChange = (e, option) => {
@@ -23,13 +25,41 @@ const VendorModal = ({
       newData.description = option ? option.description : "";
     } else {
       newData[name] = value;
-      setErrors("");
+      setVendorErrors("");
     }
     if (option) {
       setSelectedOption(option);
+      setVendorErrors("");
     }
     setVenderData(newData);
   };
+
+  const groupedWorkOrderData = useMemo(() => {
+    let result = [];
+    let obj = {};
+    let filtered = [workOrderItems];
+
+    let flattenedFiltered = filtered.flat();
+
+    flattenedFiltered.forEach((item) => {
+      if (item) {
+        const currentItem = item;
+        if (!obj[currentItem.partNumber]) {
+          obj[currentItem.partNumber] = {
+            id: item.partNumber,
+            partNumber: currentItem.partNumber ? currentItem.partNumber : null,
+            quantity: 0,
+            partDescription: currentItem.partDescription,
+          };
+          return result.push(obj[currentItem.partNumber]);
+        }
+
+        obj[currentItem.partNumber].quantity += Number(currentItem.quantity);
+      }
+    });
+
+    return result;
+  }, [workOrderItems]);
 
   return (
     <Container maxWidth="sm">
@@ -37,13 +67,13 @@ const VendorModal = ({
         <div className="d-flex gap-2 align-items-start">
           <div className="d-grid gap-1">
             <AutoComplete
-              options={groupedProductData}
+              options={groupedWorkOrderData}
               name="partNumber"
               label="Part Number"
               onChange={handleChange}
               getCustomOption={getCustomOption}
               value={selectedOption}
-              error={errors.partNumber}
+              error={vendorErrors.partNumber}
             />
           </div>
           <Input
@@ -52,7 +82,7 @@ const VendorModal = ({
             label="quantity"
             onChange={handleChange}
             value={venderData.quantity || ""}
-            error={errors.quantity}
+            error={vendorErrors.quantity}
             required
           />
         </div>

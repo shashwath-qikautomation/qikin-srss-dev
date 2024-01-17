@@ -8,7 +8,8 @@ const LOGIN = "LOGIN",
   ROLE = "ROLE",
   SETTINGS = "SETTINGS",
   PURCHASE_LIST = "SAVE_PURCHASE_ITEMS",
-  VENDORS_LIST = "VENDORS_LIST";
+  VENDORS_LIST = "VENDORS_LIST",
+  VENDORS_INVENTORY = "VENDORS_INVENTORY";
 
 //--------------actions-----------------------
 const updateLoginUser = (payload) => {
@@ -71,6 +72,13 @@ const updateVendors = (payload) => {
   };
 };
 
+const updateVendorsInventory = (payload) => {
+  return {
+    type: VENDORS_INVENTORY,
+    payload,
+  };
+};
+
 export {
   LOGIN,
   LOGOUT,
@@ -82,6 +90,7 @@ export {
   SETTINGS,
   PURCHASE_LIST,
   VENDORS_LIST,
+  VENDORS_INVENTORY,
   //------------------------------
   updateLoginUser,
   updateInventory,
@@ -92,4 +101,5 @@ export {
   updateSettings,
   updatePurchase,
   updateVendors,
+  updateVendorsInventory,
 };

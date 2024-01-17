@@ -9,6 +9,7 @@ const apiEndPoints = {
   role: "role",
   purchase: "purchase",
   vendor: "vendors",
+  vendorEntity: "vendors-entity",
 };
 
 export default apiEndPoints;

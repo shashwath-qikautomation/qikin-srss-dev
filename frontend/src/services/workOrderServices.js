@@ -33,7 +33,7 @@ const addWorkOrder = async (workOrder) => {
       apiEndPoints.serverPath + apiEndPoints.workOrders,
       workOrder
     );
-
+    console.log(data);
     if (status === 200) {
       return data;
     }
