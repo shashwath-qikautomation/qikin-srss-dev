@@ -6,6 +6,7 @@ const socketEvents = {
   PRODUCTS: "data/PRODUCTS",
   PURCHASE: "data/PURCHASE",
   VENDORS: "data/VENDORS",
+  VENDOR_ENTITY: "data/VENDOR_ENTITY",
 };
 
 export default socketEvents;

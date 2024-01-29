@@ -13,6 +13,7 @@ import workOrderServices from "../../services/workOrderServices";
 import Delete from "@mui/icons-material/Delete";
 import { IconButton } from "@mui/material";
 import { Container } from "@mui/system";
+import ConfirmBox from "../../components/ConfirmBox";
 
 function ApproveWorkOrder({
   handleModalClose,
@@ -37,6 +38,7 @@ function ApproveWorkOrder({
   const [rowsPerPage, setRowsPerPage] = useState(10);
   const [errors, setErrors] = useState({});
   const [isLoading, toggleLoading] = useState(false);
+  const [compareVendorQuantity, setCompareVendorQuantity] = useState(false);
 
   const columns = [
     {
@@ -209,7 +211,6 @@ function ApproveWorkOrder({
     const inventoryItem = inventory.find(
       (item) => item.partNumber === partNumber
     );
-    console.log(inventoryItem);
     if (inventoryItem) {
       return inventoryItem.quantity;
     }
@@ -221,44 +222,106 @@ function ApproveWorkOrder({
     navigate(routes.workOrders);
   };
 
+  // let availItem = workOrderItems.map((item) => {
+  //   const availableQuantity = calculateAvailableQuantity(item.partNumber);
+  //   return {
+  //     ...item,
+  //     availableQuantity,
+  //   };
+  // });
+
+  // let availableItems = availItem.map(
+  //   (getquantity) => getquantity.availableQuantity
+  // );
+
+  // let vendorQuantity = vendorsItem.map((items) => {
+  //   return items.partNumber;
+  // });
+
+  // for (let i = 0; i < availableItems.length; i++) {
+  //   // let update = availableItems[i] - vendorQuantity[i];
+  //   let findInventoryItems = inventory.find(
+  //     (findItem) => findItem.partNumber === vendorQuantity[i]
+  //   );
+  //   console.log(findInventoryItems);
+  // }
+
   const onApprove = async () => {
-    let isInventorySufficient = true;
-    workOrderItems.forEach((item) => {
-      const availableQuantity = getAvailableQuantity(item.partNumber);
-      if (availableQuantity < item.quantity) {
-        isInventorySufficient = false;
-      }
+    //to check vendors total quantity less than inventory quantity;
+    let availItem = workOrderItems.map((item) => {
+      const availableQuantity = calculateAvailableQuantity(item.partNumber);
+      return {
+        ...item,
+        availableQuantity,
+      };
     });
-    if (product) {
-      if (isInventorySufficient) {
-        const updatePromises = [];
-        const updatedWorkOrders = {
-          description,
-          items: product.items,
-          _id: product._id,
-        };
-        updatedWorkOrders.status = 1;
-        const workOrderUpdated = await workOrderServices.updateWorkOrder(
-          updatedWorkOrders
-        );
-        updatePromises.push(workOrderUpdated);
 
-        const vendorsData = {
-          vendorId: product.vendorId._id,
-          workOrderId: product.workOrderNumber,
-          vendorQuantity: vendorsItem,
-          requiredQuantity: product.items,
-        };
-        const addVendorInventory = await vendorsServices.addVendorInventory(
-          vendorsData
-        );
+    let availableItems = availItem.map(
+      (getquantity) => getquantity.availableQuantity
+    );
 
-        if (updatePromises && addVendorInventory) {
-          navigateToWorkOrder();
-        } else {
-        }
+    let vendorQuantity = vendorsItem.map((items) => {
+      return items.quantity;
+    });
+
+    for (let i = 0; i < availableItems.length; i++) {
+      if (vendorQuantity[i] > availableItems[i]) {
+        setCompareVendorQuantity(true);
       } else {
-        setShowWorkOrder(true);
+        let isInventorySufficient = true;
+        workOrderItems.forEach((item) => {
+          const availableQuantity = getAvailableQuantity(item.partNumber);
+          if (availableQuantity < item.quantity) {
+            isInventorySufficient = false;
+          }
+        });
+        if (product) {
+          if (isInventorySufficient) {
+            const updatePromises = [];
+            const updatedWorkOrders = {
+              description,
+              items: product.items,
+              _id: product._id,
+            };
+            updatedWorkOrders.status = 1;
+            const workOrderUpdated = await workOrderServices.updateWorkOrder(
+              updatedWorkOrders
+            );
+            updatePromises.push(workOrderUpdated);
+
+            const vendorsData = {
+              vendorId: product.vendorId._id,
+              workOrderId: product.workOrderNumber,
+              vendorQuantity: vendorsItem,
+              requiredQuantity: product.items,
+            };
+            const addVendorInventory = await vendorsServices.addVendorInventory(
+              vendorsData
+            );
+
+            // to update inventory List
+            let vendorPartnumber = vendorsItem.map((items) => {
+              return items.partNumber;
+            });
+            let update = availableItems[i] - vendorQuantity[i];
+            let findInventoryItems = inventory.find(
+              (findItem) => findItem.partNumber === vendorPartnumber[i]
+            );
+
+            const updateInventory = await inventoryServices.updateInventory({
+              ...findInventoryItems,
+              quantity: update,
+              _id: findInventoryItems._id,
+            });
+
+            if (updatePromises && addVendorInventory && updateInventory) {
+              navigateToWorkOrder();
+            } else {
+            }
+          } else {
+            setShowWorkOrder(true);
+          }
+        }
       }
     }
   };
@@ -276,14 +339,18 @@ function ApproveWorkOrder({
   );
 
   let allItemsAvailable = inventoryPartnumber.every(
-    (element, i) => workOrderItems[i].quantity < element.quantity
+    (element, i) => workOrderItems[i].quantity <= element.quantity
   );
 
   return (
     <Container maxWidth="lg">
       <div className="d-grid gap-2 p-2">
         <div className="d-flex gap-2 justify-content-end">
-          <Button name="Add Vendor Quantity" onClick={addVendorQuantity} />
+          <Button
+            name="Add Vendor Quantity"
+            disabled={allItemsAvailable === false}
+            onClick={addVendorQuantity}
+          />
           <Button
             name="Approve"
             disabled={
@@ -329,6 +396,12 @@ function ApproveWorkOrder({
           />
         </div>
       </div>
+      <ConfirmBox
+        showConfirm={compareVendorQuantity}
+        content="Insufficient available quantity, vendor quantity must be less than available quantity."
+        cancelName={true}
+        onAgree={() => setCompareVendorQuantity(false)}
+      />
     </Container>
   );
 }

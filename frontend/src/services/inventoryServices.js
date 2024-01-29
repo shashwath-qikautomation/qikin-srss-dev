@@ -46,6 +46,7 @@ const upsertInventoryData = async (inventory) => {
 };
 
 const updateInventory = async (updatedInventory) => {
+  console.log(updatedInventory);
   try {
     const { data } = await http.patch(
       apiEndPoints.serverPath +

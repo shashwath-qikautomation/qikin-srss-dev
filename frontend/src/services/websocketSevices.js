@@ -10,6 +10,7 @@ import {
   SETTINGS,
   PURCHASE_LIST,
   VENDORS_LIST,
+  VENDORS_INVENTORY,
 } from "../redux/action";
 import socketEvents from "./webSocketEvents";
 
@@ -209,6 +210,17 @@ export const listenToData = (socket, dispatch, currentUser) => {
       let vendor = [...vendorsList];
       vendor = vendor.filter((vendor) => vendor._id !== dataFromSocket.id);
       dispatch({ type: VENDORS_LIST, payload: vendor });
+    }
+  });
+
+  //to Vendor Entity
+  socket.on(socketEvents.VENDOR_ENTITY, async (dataFromSocket) => {
+    let { vendorsInventory } = store.getState();
+    if (dataFromSocket.status === 3) {
+      //to delete VendorEntity
+      let vendor = [...vendorsInventory];
+      vendor = vendor.filter((vendor) => vendor._id !== dataFromSocket.id);
+      dispatch({ type: VENDORS_INVENTORY, payload: vendor });
     }
   });
 };

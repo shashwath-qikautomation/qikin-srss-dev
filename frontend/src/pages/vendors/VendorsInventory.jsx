@@ -16,51 +16,11 @@ import VendorData from "./VenderData";
 
 const VendorsInventory = () => {
   const { id } = useParams();
-  const [sortColumn, setSortColumn] = useState("createdAt");
-  const [sortOrder, setSortOrder] = useState("desc");
-  const [currentPage, setCurrentPage] = useState(0);
-  const [rowsPerPage, setRowsPerPage] = useState(10);
-  const [search, setSearch] = useState("");
-  const [showDescription, setShowDescription] = useState(false);
-  const [index, setIndex] = useState();
+
   const [vendorInventoryItems, setVendorInventoryItems] = useState([]);
 
   const { vendorsInventory } = useSelector((state) => state);
   const dispatch = useDispatch();
-
-  const columns = [
-    {
-      path: "#",
-      label: "#",
-      content: useCallback(
-        (wo, index) => <span>{currentPage * rowsPerPage + index + 1}</span>,
-        [currentPage, rowsPerPage]
-      ),
-    },
-    {
-      path: "partName",
-      label: "Part Number",
-      content: useCallback((vendorInventory, i) => {
-        return (
-          <div>
-            {" "}
-            <p>{vendorInventory.partNumber || "-"}</p>
-          </div>
-        );
-      }),
-      sortable: true,
-    },
-    {
-      path: "requiredQuantity",
-      label: "Required Quantity",
-      content: useCallback((vendorInventory) => {
-        return <div>{vendorInventory?.quantity}</div>;
-      }, []),
-      sortable: true,
-    },
-  ];
-
-  console.log(vendorsInventory);
 
   const getData = useCallback(async () => {
     const [vendorInventoryData] = await Promise.all([
@@ -108,45 +68,6 @@ const VendorsInventory = () => {
         />
       </div>
       <VendorData vendorsInventory={vendorsInventory} id={id} />
-      <Container maxWidth="xxl">
-        <Card className="shadow-sm p-3 ">
-          <div className="d-flex flex-wrap justify-content-between gap-2">
-            <div>
-              <Input
-                label="search"
-                name="Search"
-                //   value={search}
-                //   onChange={async (e) => {
-                //     setSearch(e.target.value);
-                //   }}
-                InputProps={{
-                  endAdornment: (
-                    <InputAdornment
-                      type="hidden"
-                      position="end"
-                      style={{ cursor: "pointer" }}
-                    >
-                      {/* {search && <CloseIcon onClick={() => setSearch("")} />} */}
-                    </InputAdornment>
-                  ),
-                }}
-              />
-            </div>
-            <DataTable
-              rows={vendorInventoryItems}
-              columns={columns}
-              sortColumn={sortColumn}
-              sortOrder={sortOrder}
-              currentPage={currentPage}
-              rowsPerPage={rowsPerPage}
-              setSortColumn={setSortColumn}
-              setSortOrder={setSortOrder}
-              setCurrentPage={setCurrentPage}
-              setRowsPerPage={setRowsPerPage}
-            />
-          </div>
-        </Card>
-      </Container>
     </div>
   );
 };

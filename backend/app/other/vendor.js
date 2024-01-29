@@ -13,3 +13,14 @@ exports.vendorSocketIo = async (id, status) => {
     console.log(error);
   }
 };
+
+exports.vendorEntitySocketIo = async (id, status) => {
+  try {
+    await sendMessage("data/VENDOR_ENTITY", "data/VENDOR_ENTITY", {
+      id: id,
+      status: status,
+    });
+  } catch (error) {
+    console.log(error);
+  }
+};

@@ -1,5 +1,5 @@
 const db = require("../models/index");
-const { vendorSocketIo } = require("../other/vendor");
+const { vendorSocketIo, vendorEntitySocketIo } = require("../other/vendor");
 
 //Create New vendor
 exports.createVendor = async (req, res) => {
@@ -84,12 +84,7 @@ exports.deleteVendor = async (req, res) => {
       vendorId: req.params.id,
     });
 
-    // if (!vendorEntityData) {
-    //   // If vendorEntity not found, still proceed and emit socket event
-    //   workOrderSocketIo(req.params.id, 3);
-    // } else {
-    //   workOrderSocketIo(vendorEntityData._id, 3);
-    // }
+    vendorEntitySocketIo(vendorEntityData._id, 3);
 
     return res
       .status(200)
